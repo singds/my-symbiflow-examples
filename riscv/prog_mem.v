@@ -12,9 +12,9 @@ module prog_mem
     assign data = mem[address];
 
     initial begin
-        mem['h0000] <= 32'h00000001;
-        mem['h0001] <= 32'h00000002;
-        mem['h0002] <= 32'h00000003;
-        mem['h0003] <= 32'hf0000004;
+        mem['h0000] <= 32'h00000013; // nop
+        mem['h0001] <= 32'h00000013;
+        mem['h0002] <= 32'h00000013;
+        mem['h0003] <= 32'hf0000013;
     end
 endmodule
