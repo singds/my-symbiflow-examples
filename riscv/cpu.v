@@ -2,7 +2,7 @@ module cpu (
     input clk,
     // all instruction are 32bit wide
     output [31:0] inst_addr, // instruction memory address
-    input [31:0] inst_val, // instruction memory data
+    input [31:0] inst_val // instruction memory data
 
 /*
     output [31:0] data_addr, // data memory address. <data_addr> ia always available in <data_rd>
@@ -16,8 +16,10 @@ module cpu (
     reg [31:0] pc;
     reg [31:0] xreg [0:NUMREG-1];
     
-    wire [31:0] next_pc;
-    wire [31:0] next_xreg [0:NUMREG-1];
+    // these should not become registers in synthesis
+    reg [31:0] next_pc;
+    reg [31:0] next_xreg [0:NUMREG-1];
+    reg [31:0] k; // loop variable
 
     wire [6:0] opcode;
     wire [4:0] rd;
@@ -34,9 +36,9 @@ module cpu (
     assign imm = inst_val[31:20];
 
 
-    `define OP_IMM 7'h13;
+    parameter OP_IMM = 7'h13;
 
-    `define FUNC3_ADDI 4'h0;
+    parameter FUNC3_ADDI = 4'h0;
 
 
     // next state combinational logic
@@ -51,7 +53,8 @@ module cpu (
                 case (funct3)
 
                     FUNC3_ADDI: begin
-                        next_xreg[rs1] = xreg[rs1] + {20{imm[11]}, imm[11:0]};
+                        // TODO sign extension
+                        next_xreg[rs1] = xreg[rs1] +  imm; // {20{imm[11]}, imm[12:0]};
                     end
                 endcase
             end
