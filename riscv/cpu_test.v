@@ -8,6 +8,7 @@ module cpu_test;
     inst_mem InstMem (inst_addr, inst_data);
     cpu Cpu (clk, inst_addr, inst_data);
 
+
     reg [31:0] k; // variable for cycle
     initial begin
         $display("TEST: cpu_test");
@@ -17,16 +18,22 @@ module cpu_test;
         for (k = 0; k < 2; k++)
         begin
             #1 $display("inst_addr = %h, inst_data = %h", inst_addr, inst_data);
-            #1 clk = 1;
-            #1 clk = 0;
+            cycle;
         end
 
-        #1 clk = 1;
-        #1 clk = 0;
+        cycle;
         assert (Cpu.xreg[1] == 32'h34) $display("ok: addi x1, x0, 0x34");
 
         $finish(0);
     end
+
+    task cycle;
+    begin
+        #1 clk = 1;
+        #1 clk = 0;
+    end
+
+endtask
 
 endmodule
 
