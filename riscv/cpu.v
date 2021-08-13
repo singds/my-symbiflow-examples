@@ -5,6 +5,9 @@ module cpu (
     output [31:0] inst_addr, // instruction memory address
     input [31:0] inst_val, // instruction memory data
 
+    // these registers should not become memory elements in sythesis
+    // bacause they are always assigned in the always block
+    // tha always block represent only combinational logic
     output reg [31:0] data_addr, // data memory address. <data_addr> ia always available in <data_rd>
     input [31:0] data_rd, // data memory read
     output reg [31:0] data_wr, // data memory write
