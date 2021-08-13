@@ -35,8 +35,12 @@ module cpu (
     assign rs1 = inst_val[19:15];
     assign imm = inst_val[31:20];
 
+    assign immU = {inst_val[31:12], 12'h0};
+
 
     parameter OP_IMM = 7'h13;
+    parameter OP_LUI = 7'h37;
+    parameter OP_AUIPC = 7'h17;
 
     parameter FUNC3_ADDI = 4'h0;
 
@@ -54,9 +58,19 @@ module cpu (
 
                     FUNC3_ADDI: begin
                         // TODO sign extension
-                        next_xreg[rs1] = xreg[rs1] +  imm; // {20{imm[11]}, imm[12:0]};
+                        next_xreg[rd] = xreg[rs1] + {{20{imm[11]}}, imm};
                     end
                 endcase
+            end
+
+            // load upper immediate
+            OP_LUI: begin 
+                next_xreg[rd] = immU;
+            end
+
+            // load upper immediate to pc
+            OP_AUIPC: begin
+                next_xreg[rd] = pc + immU;
             end
         endcase
 
@@ -73,7 +87,8 @@ module cpu (
 
     initial begin
         pc = 0;
-        xreg[0] = 32'h0;
+        for (k = 0; k < NUMREG; k++)
+            xreg[k] = 32'h0;
     end
     
 endmodule

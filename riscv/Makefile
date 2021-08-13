@@ -1,6 +1,6 @@
 
 BUILDDIR := build
-IVERILOG := iverilog
+IVERILOG := iverilog -g2012
 
 ${BUILDDIR}:
 	mkdir -p ${BUILDDIR}

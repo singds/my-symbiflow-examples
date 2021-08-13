@@ -5,9 +5,8 @@ module cpu_test;
     wire [31:0] inst_addr;
     wire [31:0] inst_data;
     
-    inst_mem instMem (inst_addr, inst_data);
-    // uut = unit under test
-    cpu uut (clk, inst_addr, inst_data);
+    inst_mem InstMem (inst_addr, inst_data);
+    cpu Cpu (clk, inst_addr, inst_data);
 
     reg [31:0] k; // variable for cycle
     initial begin
@@ -15,14 +14,18 @@ module cpu_test;
         $display("instructions sequence");
         
         clk = 0;
-        for (k = 0; k < 3; k++)
+        for (k = 0; k < 2; k++)
         begin
-            #1 $display("inst_addr = %h", inst_addr);
+            #1 $display("inst_addr = %h, inst_data = %h", inst_addr, inst_data);
             #1 clk = 1;
             #1 clk = 0;
         end
 
-        $finish;
+        #1 clk = 1;
+        #1 clk = 0;
+        assert (Cpu.xreg[1] == 32'h34) $display("ok: addi x1, x0, 0x34");
+
+        $finish(0);
     end
 
 endmodule
@@ -36,11 +39,12 @@ module inst_mem
 
     reg [31:0] mem [0:MEM_SIZE-1];
 
-    assign data = mem[address];
+    assign data = mem[address[31:2]];
 
     initial begin
         mem['h0000] <= 32'h00000013; // nop
         mem['h0001] <= 32'h00000013; // nop
-        mem['h0002] <= 32'h00000013; // nop
+        mem['h0002] <= 32'h03400093; // addi x1, x0, 0x34
     end
 endmodule
+
