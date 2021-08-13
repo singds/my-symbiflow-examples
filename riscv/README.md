@@ -7,7 +7,7 @@ compile assembly code
 /opt/riscv32i/bin/riscv32-unknown-elf-as main.S -o build/out.elf
 
 disassembly code
-/opt/riscv32i/bin/riscv32-unknown-elf-objdump --disassemble build/out.elf  
+/opt/riscv32i/bin/riscv32-unknown-elf-objdump --disassemble -Mnumeric build/out.elf  
 
 get a section as hex file  
 /opt/riscv32i/bin/riscv32-unknown-elf-objcopy -j.text -O ihex build/out.elf build/out.hex  

@@ -2,19 +2,20 @@ module cpu (
     input clk,
     // all instruction are 32bit wide
     output [31:0] inst_addr, // instruction memory address
-    input [31:0] inst_val // instruction memory data
+    input [31:0] inst_val, // instruction memory data
 
-/*
-    output [31:0] data_addr, // data memory address. <data_addr> ia always available in <data_rd>
-    input [31:0] data_rd; // data memory data
-    output [31:0] data_wr; // data memory write
-    output data_wr, // data memory write.
-*/
+    output reg [31:0] data_addr, // data memory address. <data_addr> ia always available in <data_rd>
+    input [31:0] data_rd, // data memory read
+    output reg [31:0] data_wr, // data memory write
+    output reg [3:0] data_wr_en // data memory write.
 );
     localparam NUMREG = 32;
 
     reg [31:0] pc;
     reg [31:0] xreg [0:NUMREG-1];
+    // reg [31:0] data_addr;
+    // reg [31:0] data_wr;
+    // reg [3:0] data_wr_en;
     
     // these should not become registers in synthesis
     reg [31:0] next_pc;
@@ -25,7 +26,10 @@ module cpu (
     wire [4:0] rd;
     wire [2:0] funct3;
     wire [4:0] rs1;
-    wire [11:0] imm;
+    wire [4:0] rs2;
+    wire [11:0] immI;
+    wire [31:0] immU;
+    wire [11:0] immS;
 
     // instruction decode
     assign inst_addr = pc; // pc defines the instruction to fetch
@@ -33,14 +37,17 @@ module cpu (
     assign rd = inst_val[11:7];
     assign funct3 = inst_val[14:12];
     assign rs1 = inst_val[19:15];
-    assign imm = inst_val[31:20];
+    assign rs2 = inst_val[24:20];
 
+    assign immI = inst_val[31:20];
     assign immU = {inst_val[31:12], 12'h0};
+    assign immS = {inst_val[31:25], inst_val[11:7]};
 
 
     parameter OP_IMM = 7'h13;
     parameter OP_LUI = 7'h37;
     parameter OP_AUIPC = 7'h17;
+    parameter OP_STORE = 7'h23;
 
     parameter FUNC3_ADDI = 4'h0;
 
@@ -50,6 +57,9 @@ module cpu (
         next_pc = pc + 4;
         for (k = 0; k < NUMREG; k++)
             next_xreg[k] = xreg[k];
+        data_addr = 0;
+        data_wr = 0;
+        data_wr_en = 0;
 
         case (opcode)
 
@@ -58,9 +68,21 @@ module cpu (
 
                     FUNC3_ADDI: begin
                         // TODO sign extension
-                        next_xreg[rd] = xreg[rs1] + {{20{imm[11]}}, imm};
+                        next_xreg[rd] = xreg[rs1] + {{20{immI[11]}}, immI};
                     end
                 endcase
+            end
+
+            // store
+            OP_STORE: begin
+                data_addr = xreg[rs1] + {{20{immS[11]}}, immS};
+                data_wr = xreg[rs2];
+                if (funct3 == 0)
+                    data_wr_en = 4'b0001;
+                else if (funct3 == 1)
+                    data_wr_en = 4'b0011;
+                else if (funct3 == 2)
+                    data_wr_en = 4'b1111;
             end
 
             // load upper immediate

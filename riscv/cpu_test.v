@@ -4,8 +4,14 @@ module cpu_test;
     reg clk;
     wire [31:0] inst_addr; // unused
     reg [31:0] inst_data;
+
+    wire [31:0] data_addr, data_rd, data_wr;
+    wire [3:0] data_wr_en;
     
-    cpu Cpu (clk, inst_addr, inst_data); 
+    ram Ram (clk, data_wr_en, data_addr, data_wr, data_rd);
+
+    cpu Cpu (clk, inst_addr, inst_data,
+        data_addr, data_rd, data_wr, data_wr_en);
 
     reg [31:0] k; // variable for cycle
     initial begin
@@ -17,6 +23,7 @@ module cpu_test;
 
         testNop ( );
         testAddi ( );
+        testStore ( );
 
         $finish(0);
     end
@@ -59,5 +66,38 @@ module cpu_test;
     end
     endtask
 
+    // Test STORE operation
+    task testStore;
+    begin
+        exeInst (32'h00000093); // li      x1,0
+        exeInst (32'h00100113); // li      x2,1
+        exeInst (32'h0020a023); // sw      x2,0(x1)
+        clkCycle; // store needs additional click to save
+        assert (Ram.mem[0] == 1);
+
+        $display("ok: store");
+    end
+    endtask
+
 endmodule
 
+// ram start at address 0
+module ram #(
+	parameter integer WORDS = 256
+) (
+	input clk,
+	input [3:0] wen,
+	input [21:0] addr,
+	input [31:0] wdata,
+	output reg [31:0] rdata
+);
+	reg [31:0] mem [0:WORDS-1];
+
+	always @(posedge clk) begin
+		rdata <= mem[addr];
+		if (wen[0]) mem[addr][ 7: 0] <= wdata[ 7: 0];
+		if (wen[1]) mem[addr][15: 8] <= wdata[15: 8];
+		if (wen[2]) mem[addr][23:16] <= wdata[23:16];
+		if (wen[3]) mem[addr][31:24] <= wdata[31:24];
+	end
+endmodule
