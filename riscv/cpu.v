@@ -1,5 +1,6 @@
 module cpu (
     input clk,
+
     // all instruction are 32bit wide
     output [31:0] inst_addr, // instruction memory address
     input [31:0] inst_val, // instruction memory data
@@ -13,9 +14,6 @@ module cpu (
 
     reg [31:0] pc;
     reg [31:0] xreg [0:NUMREG-1];
-    // reg [31:0] data_addr;
-    // reg [31:0] data_wr;
-    // reg [3:0] data_wr_en;
     
     // these should not become registers in synthesis
     reg [31:0] next_pc;
@@ -30,6 +28,7 @@ module cpu (
     wire [11:0] immI;
     wire [31:0] immU;
     wire [11:0] immS;
+    wire [20:0] immJ;
 
     // instruction decode
     assign inst_addr = pc; // pc defines the instruction to fetch
@@ -42,12 +41,14 @@ module cpu (
     assign immI = inst_val[31:20];
     assign immU = {inst_val[31:12], 12'h0};
     assign immS = {inst_val[31:25], inst_val[11:7]};
+    assign immJ = {inst_val[31], inst_val[19:12], inst_val[20], inst_val[30:21], 1'b0}; 
 
 
     parameter OP_IMM = 7'h13;
     parameter OP_LUI = 7'h37;
     parameter OP_AUIPC = 7'h17;
     parameter OP_STORE = 7'h23;
+    parameter OP_JAL = 7'h6f;
 
     parameter FUNC3_ADDI = 4'h0;
 
@@ -71,6 +72,13 @@ module cpu (
                         next_xreg[rd] = xreg[rs1] + {{20{immI[11]}}, immI};
                     end
                 endcase
+            end
+
+            // jal
+            OP_JAL: begin
+                next_xreg[rd] = pc + 4;
+                // The offset is sign-extended and added to the pc to form the jump target address.
+                next_pc = pc + {{12{immJ[20]}}, immJ};
             end
 
             // store
@@ -100,12 +108,16 @@ module cpu (
         xreg[0] = 32'h0;
     end
 
+
+
     always @(posedge clk) begin
         // move to the next state
         for (k = 0; k < NUMREG; k++)
             xreg[k] = next_xreg[k];
         pc = next_pc;
     end
+
+
 
     initial begin
         pc = 0;

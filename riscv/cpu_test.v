@@ -8,12 +8,13 @@ module cpu_test;
     wire [31:0] data_addr, data_rd, data_wr;
     wire [3:0] data_wr_en;
     
-    ram Ram (clk, data_wr_en, data_addr, data_wr, data_rd);
+    ram Ram (clk, data_wr_en, data_addr[21:0], data_wr, data_rd);
 
     cpu Cpu (clk, inst_addr, inst_data,
         data_addr, data_rd, data_wr, data_wr_en);
 
     reg [31:0] k; // variable for cycle
+    reg [31:0] save;
     initial begin
         $display("TEST: cpu_test");
         $display("instructions sequence");
@@ -24,6 +25,7 @@ module cpu_test;
         testNop ( );
         testAddi ( );
         testStore ( );
+        testJal ( );
 
         $finish(0);
     end
@@ -46,10 +48,10 @@ module cpu_test;
     // Test NOP operation
     task testNop;
     begin
-        assert (Cpu.pc == 32'h0);
+        save = Cpu.pc;
 
         exeInst (32'h00000013); // nop
-        assert (Cpu.pc == 32'h4);
+        assert (Cpu.pc == (save + 4));
         else $display("pc=%h", Cpu.pc);
 
         $display("ok: nop");
@@ -72,10 +74,24 @@ module cpu_test;
         exeInst (32'h00000093); // li      x1,0
         exeInst (32'h00100113); // li      x2,1
         exeInst (32'h0020a023); // sw      x2,0(x1)
-        clkCycle; // store needs additional click to save
         assert (Ram.mem[0] == 1);
 
         $display("ok: store");
+    end
+    endtask
+
+    task testJal;
+    begin
+        exeInst (32'h00000013); // nop
+        exeInst (32'h00000013); // nop
+        exeInst (32'h00000013); // nop
+        exeInst (32'h00000013); // nop
+        exeInst (32'h00000013); // nop
+        save = Cpu.pc;
+        exeInst (32'hfedff06f); // jal pc-20
+        assert (Cpu.pc == (save - 20));
+
+        $display("ok: jal");
     end
     endtask
 
