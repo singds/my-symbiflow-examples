@@ -15,3 +15,5 @@ disassembly code to see instruction hex values
 get a section as hex file  
 /opt/riscv32i/bin/riscv32-unknown-elf-objcopy -j.text -O ihex build/out.elf build/out.hex  
 
+open waveforms with gtkwave
+gtkwave build/soc_test.vcd &

@@ -1,10 +1,11 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 TOP := top
-VERILOG := ${current_dir}/top.v \
-	${current_dir}/soc.v \
-	${current_dir}/cpu.v \
-	${current_dir}/prog_mem.v
+SRCDIR = ${current_dir}/src
+VERILOG := ${SRCDIR}/top.v \
+	${SRCDIR}/src/soc.v \
+	${SRCDIR}/src/cpu.v \
+	${SRCDIR}/src/prog_mem.v
 DEVICE := xc7a50t_test
 BITSTREAM_DEVICE := artix7
 BUILDDIR := build
@@ -14,11 +15,16 @@ TARGET=arty_35
 BOARD_BUILDDIR := ${BUILDDIR}/arty_35
 
 IVERILOG := iverilog -g2012
+IVERILOGVVP := vvp
+TESTDIR = ${current_dir}/test
 
 .DELETE_ON_ERROR:
 
 
 all: ${BOARD_BUILDDIR}/${TOP}.bit
+
+${BUILDDIR}:
+	mkdir -p ${BUILDDIR}
 
 ${BOARD_BUILDDIR}:
 	mkdir -p ${BOARD_BUILDDIR}
@@ -48,11 +54,12 @@ clean:
 run:
 	cd ${BOARD_BUILDDIR} && sudo openocd -f ${INSTALL_DIR}/${FPGA_FAM}/conda/envs/${FPGA_FAM}/share/openocd/scripts/board/digilent_arty.cfg -c "init; pld load 0 top.bit; exit"
 
+.PHONY: test
 test: ${BUILDDIR}
-	${IVERILOG} prog_mem_test.v prog_mem.v -o ${BUILDDIR}/prog_mem_test
-	${IVERILOG} cpu_test.v cpu.v -o ${BUILDDIR}/cpu_test
-	${IVERILOG} soc_test.v soc.v cpu.v prog_mem.v -o ${BUILDDIR}/soc_test
+	${IVERILOG} ${TESTDIR}/prog_mem_test.v ${SRCDIR}/prog_mem.v -o ${BUILDDIR}/prog_mem_test
+	${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o ${BUILDDIR}/cpu_test
+	${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/prog_mem.v -o ${BUILDDIR}/soc_test
 
-	${BUILDDIR}/prog_mem_test
-	${BUILDDIR}/cpu_test
-	${BUILDDIR}/soc_test
+	cd ${BUILDDIR} && ${IVERILOGVVP} prog_mem_test
+	cd ${BUILDDIR} && ${IVERILOGVVP} cpu_test
+	cd ${BUILDDIR} && ${IVERILOGVVP} soc_test
