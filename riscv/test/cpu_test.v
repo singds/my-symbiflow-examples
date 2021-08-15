@@ -74,10 +74,48 @@ module cpu_test;
     // Test STORE operation
     task testStore;
     begin
-        exeInst (32'h00000093); // li      x1,0
+        
         exeInst (32'h00100113); // li      x2,1
+
+        // STORE 1 BYTE
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00000093); // li      x1,0
+        // store x2 in address x1 + 0
+        exeInst (32'h00208023); // sb      x2,0(x1)
+        assert (Ram.mem[0] == 32'hffffff01);
+
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00100093); // li      x1,1
+        exeInst (32'h00208023); // sb      x2,0(x1)
+        assert (Ram.mem[0] == 32'hffff01ff);
+
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00200093); // li      x1,2
+        exeInst (32'h00208023); // sb      x2,0(x1)
+        assert (Ram.mem[0] == 32'hff01ffff);
+
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00300093); // li      x1,3
+        exeInst (32'h00208023); // sb      x2,0(x1)
+        assert (Ram.mem[0] == 32'h01ffffff);
+
+
+        // STORE 2 BYTES
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00000093); // li      x1,0
+        exeInst (32'h00209023); // sh      x2,0(x1)
+        assert (Ram.mem[0] == 32'hffff0001);
+
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00200093); // li      x1,2
+        exeInst (32'h00209023); // sh      x2,0(x1)
+        assert (Ram.mem[0] == 32'h0001ffff);
+
+        // STORE 4 BYTES
+        Ram.mem[0] = 32'hffffffff;
+        exeInst (32'h00000093); // li      x1,0
         exeInst (32'h0020a023); // sw      x2,0(x1)
-        assert (Ram.mem[0] == 1);
+        assert (Ram.mem[0] == 32'h00000001);
 
         $display("ok: store");
     end

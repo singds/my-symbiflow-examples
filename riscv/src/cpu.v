@@ -23,28 +23,21 @@ module cpu (
     reg [31:0] next_xreg [0:NUMREG-1];
     reg [31:0] k; // loop variable
 
-    wire [6:0] opcode;
-    wire [4:0] rd;
-    wire [2:0] funct3;
-    wire [4:0] rs1;
-    wire [4:0] rs2;
-    wire [11:0] immI;
-    wire [31:0] immU;
-    wire [11:0] immS;
-    wire [20:0] immJ;
-
     // instruction decode
     assign inst_addr = pc; // pc defines the instruction to fetch
-    assign opcode = inst_val[6:0];
-    assign rd = inst_val[11:7];
-    assign funct3 = inst_val[14:12];
-    assign rs1 = inst_val[19:15];
-    assign rs2 = inst_val[24:20];
+    wire [6:0] opcode = inst_val[6:0];
+    wire [4:0] rd = inst_val[11:7];
+    wire [2:0] funct3 = inst_val[14:12];
+    wire [4:0] rs1 = inst_val[19:15];
+    wire [4:0] rs2 = inst_val[24:20];
 
-    assign immI = inst_val[31:20];
-    assign immU = {inst_val[31:12], 12'h0};
-    assign immS = {inst_val[31:25], inst_val[11:7]};
-    assign immJ = {inst_val[31], inst_val[19:12], inst_val[20], inst_val[30:21], 1'b0}; 
+    wire [11:0] immI = inst_val[31:20];
+    wire [31:0] immU = {inst_val[31:12], 12'h0};
+    wire [11:0] immS = {inst_val[31:25], inst_val[11:7]};
+    wire [20:0] immJ = {inst_val[31], inst_val[19:12], inst_val[20], inst_val[30:21], 1'b0}; 
+
+    
+    wire [31:0] OpStoreAddr = xreg[rs1] + {{20{immS[11]}}, immS};
 
 
     parameter OP_IMM = 7'h13;
@@ -54,7 +47,6 @@ module cpu (
     parameter OP_JAL = 7'h6f;
 
     parameter FUNC3_ADDI = 4'h0;
-
 
     // next state combinational logic
     always @* begin
@@ -86,14 +78,18 @@ module cpu (
 
             // store
             OP_STORE: begin
-                data_addr = xreg[rs1] + {{20{immS[11]}}, immS};
-                data_wr = xreg[rs2];
+                // EEI not support misaligned loads and stores
+                data_addr = {OpStoreAddr[31:2], 2'h0};
+
+                data_wr = xreg[rs2] << {OpStoreAddr[1:0], 3'h0};
                 if (funct3 == 0)
                     data_wr_en = 4'b0001;
                 else if (funct3 == 1)
                     data_wr_en = 4'b0011;
                 else if (funct3 == 2)
                     data_wr_en = 4'b1111;
+                
+                data_wr_en = data_wr_en << OpStoreAddr[1:0];
             end
 
             // load upper immediate
