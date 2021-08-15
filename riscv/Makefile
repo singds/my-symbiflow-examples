@@ -3,9 +3,9 @@ current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 TOP := top
 SRCDIR = ${current_dir}/src
 VERILOG := ${SRCDIR}/top.v \
-	${SRCDIR}/src/soc.v \
-	${SRCDIR}/src/cpu.v \
-	${SRCDIR}/src/prog_mem.v
+	${SRCDIR}/soc.v \
+	${SRCDIR}/cpu.v \
+	${SRCDIR}/prog_mem.v
 DEVICE := xc7a50t_test
 BITSTREAM_DEVICE := artix7
 BUILDDIR := build
