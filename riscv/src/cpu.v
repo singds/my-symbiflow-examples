@@ -59,6 +59,9 @@ module cpu (
     parameter FUNC3_XORI = 4'h4;
     parameter FUNC3_ORI = 4'h6;
     parameter FUNC3_ANDI = 4'h7;
+    parameter FUNC3_SLLI = 4'h1;
+    parameter FUNC3_SRLI = 4'h5;
+    parameter FUNC3_SRAI = 4'h5;
 
     parameter FUNC3_BEQ = 4'h0;
     parameter FUNC3_BNE = 4'h1;
@@ -128,6 +131,15 @@ module cpu (
                     end
                     FUNC3_ORI: begin
                         next_xreg[rd] = xreg[rs1] | immI32Signed;
+                    end
+                    FUNC3_SLLI: begin
+                        next_xreg[rd] = xreg[rs1] << immI[4:0];
+                    end
+                    FUNC3_SRLI: begin // FUNC3_SRAI
+                        if (inst_val[30]) // signed shift (FUNC3_SRAI)
+                            next_xreg[rd] = $signed(xreg[rs1]) >>> immI[4:0];
+                        else // logical shit (FUNC3_SRLI)
+                            next_xreg[rd] = xreg[rs1] >> immI[4:0];
                     end
                 endcase
             end

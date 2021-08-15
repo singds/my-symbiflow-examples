@@ -44,6 +44,9 @@ module cpu_test;
         testAndi ( );
         testXori ( );
         testOri ( );
+        testSlli ( );
+        testSrli ( );
+        testSrai ( );
 
         $finish(0);
     end
@@ -309,7 +312,7 @@ module cpu_test;
         Cpu.xreg[4] = 0;
         Cpu.xreg[5] = 1;
         exeInst (1, 32'h00520863); // beq     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -329,7 +332,7 @@ module cpu_test;
         Cpu.xreg[4] = 1;
         Cpu.xreg[5] = 1;
         exeInst (1, 32'h00521863); // bne     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -349,7 +352,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h05;
         Cpu.xreg[5] = -32'h10;
         exeInst (1, 32'h00524863); // blt     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -369,7 +372,7 @@ module cpu_test;
         Cpu.xreg[4] = 1;
         Cpu.xreg[5] = 0;
         exeInst (1, 32'h00526863); // bltu     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -389,7 +392,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h10;
         Cpu.xreg[5] = -32'h05;
         exeInst (1, 32'h00525863); // bge     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -409,7 +412,7 @@ module cpu_test;
         Cpu.xreg[4] = 0;
         Cpu.xreg[5] = 1;
         exeInst (1, 32'h00527863); // bgeu     x4,x5,pc+0x10
-        assert (Cpu.pc == 32'h4)
+        assert (Cpu.pc == 32'h4);
 
         // brench
         Cpu.pc = 0;
@@ -432,7 +435,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = 0;
         exeInst (1, 32'hffb2a213); // slti    x4,x5,-5
-        assert (Cpu.xreg[4] == 0)
+        assert (Cpu.xreg[4] == 0);
         // result false
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = -32'h10;
@@ -449,7 +452,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = 32'h10;
         exeInst (1, 32'h0052b213); // sltiu   x4,x5,5
-        assert (Cpu.xreg[4] == 0)
+        assert (Cpu.xreg[4] == 0);
         // result false
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = 0;
@@ -465,7 +468,7 @@ module cpu_test;
         Cpu.xreg[4] = 0; // result register
         Cpu.xreg[5] =                                  32'b11111111111111111111111111111110;
         exeInst (1, 32'hffd2f213); // andi    x4,x5,-3 // b11111111111111111111111111111101
-        assert (Cpu.xreg[4] ==                         32'b11111111111111111111111111111100)
+        assert (Cpu.xreg[4] ==                         32'b11111111111111111111111111111100);
 
         $display("ok: andi");
     end
@@ -476,7 +479,7 @@ module cpu_test;
         Cpu.xreg[4] = 0; // result register
         Cpu.xreg[5] =                                  32'b11111111111111111111111111111110;
         exeInst (1, 32'hffd2c213); // xori    x4,x5,-3 // b11111111111111111111111111111101
-        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000000011)
+        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000000011);
 
         $display("ok: xori");
     end
@@ -487,9 +490,42 @@ module cpu_test;
         Cpu.xreg[4] = 0; // result register
         Cpu.xreg[5] =                                  32'b00000000000000000000000000001100;
         exeInst (1, 32'h0032e213); // xori    x4,x5,-3 // b00000000000000000000000000000011
-        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000001111)
+        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000001111);
 
         $display("ok: ori");
+    end
+    endtask
+
+    task testSlli;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b10000000000000000101000000001100;
+        exeInst (1, 32'h00229213); // slli    x4,x5,0x2
+        assert (Cpu.xreg[4] ==                         32'b00000000000000010100000000110000);
+
+        $display("ok: slli");
+    end
+    endtask
+
+    task testSrli;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b10000000000000000101000000001100;
+        exeInst (1, 32'h0022d213); // srli    x4,x5,0x2
+        assert (Cpu.xreg[4] ==                         32'b00100000000000000001010000000011);
+        
+        $display("ok: srli");
+    end
+    endtask
+
+    task testSrai;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b10000000000000000101000000001100;
+        exeInst (1, 32'h4022d213); // srai    x4,x5,0x2
+        assert (Cpu.xreg[4] ==                         32'b11100000000000000001010000000011);
+
+        $display("ok: srai");
     end
     endtask
 
