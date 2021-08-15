@@ -47,6 +47,8 @@ module cpu_test;
         testSlli ( );
         testSrli ( );
         testSrai ( );
+        testAdd ( );
+        testSub ( );
 
         $finish(0);
     end
@@ -65,6 +67,29 @@ module cpu_test;
         inst_data = instruction;
         for (k = 0; k < ncycles; k++)
             clkCycle;
+    end
+    endtask
+
+    task setCpuReg;
+        input [4:0] num;
+        input [31:0] val;
+    begin
+        Cpu.xreg[num] = val;
+    end
+    endtask
+
+    function [31:0] getCpuReg;
+        input [4:0] num;
+    begin
+        getCpuReg = Cpu.xreg[num];
+    end
+    endfunction
+
+    task clrCpuRegs;
+        integer k;
+    begin
+        for (k = 0; k < 32; k++)
+            setCpuReg (k, 0);
     end
     endtask
 
@@ -513,7 +538,7 @@ module cpu_test;
         Cpu.xreg[5] =                                  32'b10000000000000000101000000001100;
         exeInst (1, 32'h0022d213); // srli    x4,x5,0x2
         assert (Cpu.xreg[4] ==                         32'b00100000000000000001010000000011);
-        
+
         $display("ok: srli");
     end
     endtask
@@ -526,6 +551,44 @@ module cpu_test;
         assert (Cpu.xreg[4] ==                         32'b11100000000000000001010000000011);
 
         $display("ok: srai");
+    end
+    endtask
+
+    task testAdd;
+    begin
+        clrCpuRegs ( );
+        setCpuReg (4, 32'h20000);
+        setCpuReg (5, 32'h10000);
+        exeInst (1, 32'h005200b3); // add     x1,x4,x5
+        assert (getCpuReg (1) ==  32'h30000);
+
+        // test overflow
+        clrCpuRegs ( );
+        setCpuReg (4, 32'hffffffff);
+        setCpuReg (5, 32'h4);
+        exeInst (1, 32'h005200b3); // add     x1,x4,x5
+        assert (getCpuReg (1) ==  32'h3);
+
+        $display("ok: add");
+    end
+    endtask
+
+    task testSub;
+    begin
+        clrCpuRegs ( );
+        setCpuReg (4, 32'h20000);
+        setCpuReg (5, 32'h10000);
+        exeInst (1, 32'h405200b3); // sub     x1,x4,x5
+        assert (getCpuReg (1) ==  32'h10000);
+
+        // test overflow
+        clrCpuRegs ( );
+        setCpuReg (4, 32'h4);
+        setCpuReg (5, 32'h5);
+        exeInst (1, 32'h405200b3); // sub     x1,x4,x5
+        assert (getCpuReg (1) ==  -32'h1);
+
+        $display("ok: sub");
     end
     endtask
 

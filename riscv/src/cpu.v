@@ -52,6 +52,10 @@ module cpu (
     parameter OP_LOAD = 7'h03;
     parameter OP_JALR = 7'h67;
     parameter OP_BRANCH = 7'h63;
+    parameter OP_OP = 7'h33;
+
+    parameter FUNC3_ADD = 4'h0;
+    parameter FUNC3_SUB = 4'h0;
 
     parameter FUNC3_ADDI = 4'h0;
     parameter FUNC3_SLTI = 4'h2;
@@ -82,6 +86,17 @@ module cpu (
         data_wr_en = 0;
 
         case (opcode)
+
+            OP_OP: begin
+                case (funct3)
+                    FUNC3_ADD: begin // FUNC3_SUB
+                        if (inst_val[30] == 1) // FUNC3_SUB
+                            next_xreg[rd] = xreg[rs1] - xreg[rs2];
+                        else // FUNC3_ADD
+                            next_xreg[rd] = xreg[rs1] + xreg[rs2];
+                    end
+                endcase
+            end
 
             OP_BRANCH: begin
                 case (funct3)
