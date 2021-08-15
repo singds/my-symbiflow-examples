@@ -10,7 +10,7 @@ module top (
     );
 
     wire [3:0] socled;
-    assign led = {2'h0, 1'h1, socled[0]};
+    assign led = {2'b11, socled[1:0]};
 
     soc Soc (bufg, socled[3:0]);
 endmodule
