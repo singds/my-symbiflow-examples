@@ -49,6 +49,9 @@ module cpu_test;
         testSrai ( );
         testAdd ( );
         testSub ( );
+        testSll ( );
+        testSrl ( );
+        testSra ( );
 
         $finish(0);
     end
@@ -591,6 +594,46 @@ module cpu_test;
         $display("ok: sub");
     end
     endtask
+
+
+
+    task testSll;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,            32'b10000000000000000101000000001100);
+        setCpuReg (5, 2);
+        exeInst (1, 32'h005210b3); // sll    x4,x5,0x2
+        assert (getCpuReg (1) == 32'b00000000000000010100000000110000);
+
+        $display("ok: sll");
+    end
+    endtask
+
+    task testSrl;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,            32'b10000000000000000101000000001100);
+        setCpuReg (5, 2);
+        exeInst (1, 32'h005250b3); // srl    x4,x5,0x2
+        assert (getCpuReg (1) == 32'b00100000000000000001010000000011);
+
+        $display("ok: srl");
+    end
+    endtask
+
+    task testSra;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,            32'b10000000000000000101000000001100);
+        setCpuReg (5, 2);
+        exeInst (1, 32'h405250b3); // sra    x4,x5,0x2
+        assert (getCpuReg (1) == 32'b11100000000000000001010000000011);
+
+        $display("ok: sra");
+    end
+    endtask
+
+
 
 endmodule
 

@@ -56,6 +56,12 @@ module cpu (
 
     parameter FUNC3_ADD = 4'h0;
     parameter FUNC3_SUB = 4'h0;
+    parameter FUNC3_SLL = 4'h1;
+    parameter FUNC3_SRL = 4'h5;
+    parameter FUNC3_SRA = 4'h5;
+    parameter FUNC3_AND = 4'h7;
+    parameter FUNC3_OR = 4'h6;
+    parameter FUNC3_XOR = 4'h4;
 
     parameter FUNC3_ADDI = 4'h0;
     parameter FUNC3_SLTI = 4'h2;
@@ -94,6 +100,24 @@ module cpu (
                             next_xreg[rd] = xreg[rs1] - xreg[rs2];
                         else // FUNC3_ADD
                             next_xreg[rd] = xreg[rs1] + xreg[rs2];
+                    end
+                    FUNC3_SLL: begin
+                        next_xreg[rd] = xreg[rs1] << xreg[rs2][4:0];
+                    end
+                    FUNC3_SRL: begin // FUNC3_SRA
+                        if (inst_val[30] == 1) // FUNC3_SRA
+                            next_xreg[rd] = $signed(xreg[rs1]) >>> xreg[rs2][4:0];
+                        else
+                            next_xreg[rd] = xreg[rs1] >> xreg[rs2][4:0];
+                    end
+                    FUNC3_AND: begin
+                        next_xreg[rd] = xreg[rs1] & xreg[rs2];
+                    end
+                    FUNC3_OR: begin
+                        next_xreg[rd] = xreg[rs1] | xreg[rs2];
+                    end
+                    FUNC3_XOR: begin
+                        next_xreg[rd] = xreg[rs1] ^ xreg[rs2];
                     end
                 endcase
             end
