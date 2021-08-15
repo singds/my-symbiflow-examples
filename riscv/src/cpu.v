@@ -38,6 +38,7 @@ module cpu (
 
     
     wire [31:0] OpStoreAddr = xreg[rs1] + {{20{immS[11]}}, immS};
+    wire [31:0] OpLoadAddr = xreg[rs1] + {{20{immI[11]}}, immI};
 
 
     parameter OP_IMM = 7'h13;
@@ -45,6 +46,7 @@ module cpu (
     parameter OP_AUIPC = 7'h17;
     parameter OP_STORE = 7'h23;
     parameter OP_JAL = 7'h6f;
+    parameter OP_LOAD = 7'h03;
 
     parameter FUNC3_ADDI = 4'h0;
 
@@ -74,6 +76,25 @@ module cpu (
                 next_xreg[rd] = pc + 4;
                 // The offset is sign-extended and added to the pc to form the jump target address.
                 next_pc = pc + {{12{immJ[20]}}, immJ};
+            end
+
+            OP_LOAD: begin
+                data_addr = {OpLoadAddr[31:2], 2'h0};
+                next_xreg[rd] = data_rd >> {OpLoadAddr[1:0], 3'h0};
+                case (funct3[1:0])
+                    0: begin // 1 byte
+                        if (funct3[2]) // singed
+                            next_xreg[rd] = {{24{next_xreg[rd][7]}}, next_xreg[rd][7:0]};
+                        else // unsigned
+                            next_xreg[rd] = {24'h0, next_xreg[rd][7:0]};
+                    end
+                    1: begin // 2 bytes
+                        if (funct3[2]) // signed
+                            next_xreg[rd] = {{24{next_xreg[rd][15]}}, next_xreg[rd][15:0]};
+                        else // unsigned
+                            next_xreg[rd] = {24'h0, next_xreg[rd][15:0]};
+                    end
+                endcase
             end
 
             // store
