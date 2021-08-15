@@ -153,6 +153,31 @@ module cpu_test;
         assert (Cpu.xreg[2] == 32'hffff91A1);
 
 
+        Ram.mem[0] = 32'h90A0B0C0;
+        // 1 byte load unsigned
+        Cpu.xreg[2] = 0;
+        exeInst (2, 32'h00004103); // lbu      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'h000000C0);
+        
+        exeInst (2, 32'h00104103); // lbu      x2,1(x0)
+        assert (Cpu.xreg[2] == 32'h000000B0);
+        
+        exeInst (2, 32'h00204103); // lbu      x2,2(x0)
+        assert (Cpu.xreg[2] == 32'h000000A0);
+
+        exeInst (2, 32'h00304103); // lbu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h00000090);
+
+
+        Ram.mem[0] = 32'h91A1B1C1;
+        // 2 byte load unsigned
+        exeInst (2, 32'h00005103); // lbu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h0000B1C1);
+
+        exeInst (2, 32'h00205103); // lbu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h000091A1);
+
+
         Ram.mem[0] = 32'h92A2B2C2;
         // 4 byte load
         exeInst (2, 32'h00002103); // lb      x2,0(x0)
