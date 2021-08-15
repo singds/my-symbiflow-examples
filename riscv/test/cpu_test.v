@@ -35,6 +35,10 @@ module cpu_test;
         testJalr ( );
         testBeq ( );
         testBne ( );
+        testBlt ( );
+        testBltu ( );
+        testBge ( );
+        testBgeu ( );
 
         $finish(0);
     end
@@ -332,6 +336,87 @@ module cpu_test;
         $display("ok: bne");
     end
     endtask
+
+    task testBlt;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = -32'h05;
+        Cpu.xreg[5] = -32'h10;
+        exeInst (1, 32'h00524863); // blt     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = -32'h10;
+        Cpu.xreg[5] = -32'h05;
+        exeInst (1, 32'h00524863); // blt     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: blt");
+    end
+    endtask
+
+    task testBltu;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 1;
+        Cpu.xreg[5] = 0;
+        exeInst (1, 32'h00526863); // bltu     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 0;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00526863); // bltu     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: bltu");
+    end
+    endtask
+
+    task testBge;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = -32'h10;
+        Cpu.xreg[5] = -32'h05;
+        exeInst (1, 32'h00525863); // bge     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = -32'h05;
+        Cpu.xreg[5] = -32'h05;
+        exeInst (1, 32'h00525863); // bge     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: bge");
+    end
+    endtask
+
+    task testBgeu;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 0;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00527863); // bge     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 1;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00527863); // bge     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: bgeu");
+    end
+    endtask
+
 
 endmodule
 

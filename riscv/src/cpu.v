@@ -84,6 +84,22 @@ module cpu (
                         if (xreg[rs1] != xreg[rs2])
                             next_pc = OpBranchAddr;
                     end
+                    FUNC3_BLT: begin
+                        if ($signed(xreg[rs1]) < $signed(xreg[rs2]))
+                            next_pc = OpBranchAddr;
+                    end
+                    FUNC3_BLTU: begin
+                        if (xreg[rs1] < xreg[rs2])
+                            next_pc = OpBranchAddr;
+                    end
+                    FUNC3_BGE: begin
+                        if ($signed(xreg[rs1]) >= $signed(xreg[rs2]))
+                            next_pc = OpBranchAddr;
+                    end
+                    FUNC3_BGEU: begin
+                        if (xreg[rs1] >= xreg[rs2])
+                            next_pc = OpBranchAddr;
+                    end
                 endcase
             end
 
