@@ -28,6 +28,7 @@ module cpu_test;
         testNop ( );
         testAddi ( );
         testStore ( );
+        testLoad ( );
         testJal ( );
 
         $finish(0);
@@ -35,16 +36,18 @@ module cpu_test;
 
     task clkCycle;
     begin
-        #1 clk = 1;
-        #1 clk = 0;
+        #1; clk = 1;
+        #1; clk = 0;
     end
     endtask
 
     task exeInst;
-        input [31:0] instruction;
+        input [4:0] ncycles; // clock cycles the instruction needs to execute
+        input [31:0] instruction; // the instruction
     begin
         inst_data = instruction;
-        clkCycle;
+        for (k = 0; k < ncycles; k++)
+            clkCycle;
     end
     endtask
 
@@ -53,7 +56,7 @@ module cpu_test;
     begin
         save = Cpu.pc;
 
-        exeInst (32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
         assert (Cpu.pc == (save + 4));
         else $display("pc=%h", Cpu.pc);
 
@@ -64,7 +67,7 @@ module cpu_test;
     // Test ADDI operation
     task testAddi;
     begin
-        exeInst (32'h03400093); // addi x1, x0, 0x34
+        exeInst (1, 32'h03400093); // addi x1, x0, 0x34
         assert (Cpu.xreg[1] == 32'h34);
 
         $display("ok: addi");
@@ -75,62 +78,101 @@ module cpu_test;
     task testStore;
     begin
         
-        exeInst (32'h00100113); // li      x2,1
+        exeInst (1, 32'h00100113); // li      x2,1
 
         // STORE 1 BYTE
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00000093); // li      x1,0
+        exeInst (1, 32'h00000093); // li      x1,0
         // store x2 in address x1 + 0
-        exeInst (32'h00208023); // sb      x2,0(x1)
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
         assert (Ram.mem[0] == 32'hffffff01);
 
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00100093); // li      x1,1
-        exeInst (32'h00208023); // sb      x2,0(x1)
+        exeInst (1, 32'h00100093); // li      x1,1
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
         assert (Ram.mem[0] == 32'hffff01ff);
 
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00200093); // li      x1,2
-        exeInst (32'h00208023); // sb      x2,0(x1)
+        exeInst (1, 32'h00200093); // li      x1,2
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
         assert (Ram.mem[0] == 32'hff01ffff);
 
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00300093); // li      x1,3
-        exeInst (32'h00208023); // sb      x2,0(x1)
+        exeInst (1, 32'h00300093); // li      x1,3
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
         assert (Ram.mem[0] == 32'h01ffffff);
 
 
         // STORE 2 BYTES
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00000093); // li      x1,0
-        exeInst (32'h00209023); // sh      x2,0(x1)
+        exeInst (1, 32'h00000093); // li      x1,0
+        exeInst (1, 32'h00209023); // sh      x2,0(x1)
         assert (Ram.mem[0] == 32'hffff0001);
 
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00200093); // li      x1,2
-        exeInst (32'h00209023); // sh      x2,0(x1)
+        exeInst (1, 32'h00200093); // li      x1,2
+        exeInst (1, 32'h00209023); // sh      x2,0(x1)
         assert (Ram.mem[0] == 32'h0001ffff);
+
 
         // STORE 4 BYTES
         Ram.mem[0] = 32'hffffffff;
-        exeInst (32'h00000093); // li      x1,0
-        exeInst (32'h0020a023); // sw      x2,0(x1)
+        exeInst (1, 32'h00000093); // li      x1,0
+        exeInst (1, 32'h0020a023); // sw      x2,0(x1)
         assert (Ram.mem[0] == 32'h00000001);
 
         $display("ok: store");
     end
     endtask
 
+    task testLoad;
+    begin
+
+        Ram.mem[0] = 32'h90A0B0C0;
+        // 1 byte load signed
+        Cpu.xreg[2] = 0;
+        exeInst (2, 32'h00000103); // lb      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'hffffffC0);
+        
+        exeInst (2, 32'h00100103); // lb      x2,1(x0)
+        assert (Cpu.xreg[2] == 32'hffffffB0);
+        
+        exeInst (2, 32'h00200103); // lb      x2,2(x0)
+        assert (Cpu.xreg[2] == 32'hffffffA0);
+
+        exeInst (2, 32'h00300103); // lb      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'hffffff90);
+
+
+        Ram.mem[0] = 32'h91A1B1C1;
+        // 2 byte load signed
+        exeInst (2, 32'h00001103); // lb      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'hffffB1C1);
+
+        exeInst (2, 32'h00201103); // lb      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'hffff91A1);
+
+
+        Ram.mem[0] = 32'h92A2B2C2;
+        // 4 byte load
+        exeInst (2, 32'h00002103); // lb      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'h92A2B2C2);
+
+        $display("ok: load");
+    end
+    endtask
+
     task testJal;
     begin
-        exeInst (32'h00000013); // nop
-        exeInst (32'h00000013); // nop
-        exeInst (32'h00000013); // nop
-        exeInst (32'h00000013); // nop
-        exeInst (32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
+        exeInst (1, 32'h00000013); // nop
         save = Cpu.pc;
-        exeInst (32'hfedff06f); // jal pc-20
-        assert (Cpu.pc == (save - 20));
+        exeInst (1, 32'hfedff06f); // jal pc-20
+        assert (Cpu.pc == (save - 20))
+        else $display("pc=%h, save = %h", Cpu.pc, save);
 
         $display("ok: jal");
     end

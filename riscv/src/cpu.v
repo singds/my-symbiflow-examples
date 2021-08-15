@@ -17,10 +17,12 @@ module cpu (
 
     reg [31:0] pc;
     reg [31:0] xreg [0:NUMREG-1];
+    reg [4:0] status;
     
     // these should not become registers in synthesis
     reg [31:0] next_pc;
     reg [31:0] next_xreg [0:NUMREG-1];
+    reg [4:0] next_status;
     reg [31:0] k; // loop variable
 
     // instruction decode
@@ -52,9 +54,11 @@ module cpu (
 
     // next state combinational logic
     always @* begin
-        next_pc = pc + 4;
         for (k = 0; k < NUMREG; k++)
             next_xreg[k] = xreg[k];
+        next_status = 0;
+        next_pc = pc + 4; // keep advancing as default
+
         data_addr = 0;
         data_wr = 0;
         data_wr_en = 0;
@@ -78,21 +82,30 @@ module cpu (
                 next_pc = pc + {{12{immJ[20]}}, immJ};
             end
 
+            // load, keep 2 cycles
             OP_LOAD: begin
-                data_addr = {OpLoadAddr[31:2], 2'h0};
-                next_xreg[rd] = data_rd >> {OpLoadAddr[1:0], 3'h0};
-                case (funct3[1:0])
-                    0: begin // 1 byte
-                        if (funct3[2]) // singed
-                            next_xreg[rd] = {{24{next_xreg[rd][7]}}, next_xreg[rd][7:0]};
-                        else // unsigned
-                            next_xreg[rd] = {24'h0, next_xreg[rd][7:0]};
+                case (status)
+                    0: begin // one clock to get data from memory
+                        data_addr = {OpLoadAddr[31:2], 2'h0};
+                        next_status = status + 1;
+                        next_pc = pc;
                     end
-                    1: begin // 2 bytes
-                        if (funct3[2]) // signed
-                            next_xreg[rd] = {{24{next_xreg[rd][15]}}, next_xreg[rd][15:0]};
-                        else // unsigned
-                            next_xreg[rd] = {24'h0, next_xreg[rd][15:0]};
+                    1: begin // one clock to save data in register
+                        next_xreg[rd] = data_rd >> {OpLoadAddr[1:0], 3'h0};
+                        case (funct3[1:0])
+                            0: begin // 1 byte
+                                if (!funct3[2]) // singed
+                                    next_xreg[rd] = {{24{next_xreg[rd][7]}}, next_xreg[rd][7:0]};
+                                else // unsigned
+                                    next_xreg[rd] = {24'h0, next_xreg[rd][7:0]};
+                            end
+                            1: begin // 2 bytes
+                                if (!funct3[2]) // signed
+                                    next_xreg[rd] = {{24{next_xreg[rd][15]}}, next_xreg[rd][15:0]};
+                                else // unsigned
+                                    next_xreg[rd] = {24'h0, next_xreg[rd][15:0]};
+                            end
+                        endcase
                     end
                 endcase
             end
@@ -124,6 +137,9 @@ module cpu (
             end
         endcase
 
+        
+        if (next_status == 0)
+
         // x0 must always be 0
         xreg[0] = 32'h0;
     end
@@ -135,6 +151,7 @@ module cpu (
         for (k = 0; k < NUMREG; k++)
             xreg[k] = next_xreg[k];
         pc = next_pc;
+        status = next_status;
     end
 
 
@@ -143,6 +160,7 @@ module cpu (
         pc = 0;
         for (k = 0; k < NUMREG; k++)
             xreg[k] = 32'h0;
+        status = 0;
     end
     
 endmodule
