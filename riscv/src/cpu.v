@@ -37,11 +37,11 @@ module cpu (
     wire [31:0] immU = {inst_val[31:12], 12'h0};
     wire [11:0] immS = {inst_val[31:25], inst_val[11:7]};
     wire [20:0] immJ = {inst_val[31], inst_val[19:12], inst_val[20], inst_val[30:21], 1'b0}; 
-
+    wire [12:0] immB = {inst_val[31], inst_val[7], inst_val[30:25], inst_val[11:8], 1'h0};
     
     wire [31:0] OpStoreAddr = xreg[rs1] + {{20{immS[11]}}, immS};
     wire [31:0] OpLoadAddr = xreg[rs1] + {{20{immI[11]}}, immI};
-
+    wire [31:0] OpBranchAddr = pc + {{19{immB[12]}}, immB};
 
     parameter OP_IMM = 7'h13;
     parameter OP_LUI = 7'h37;
@@ -49,8 +49,17 @@ module cpu (
     parameter OP_STORE = 7'h23;
     parameter OP_JAL = 7'h6f;
     parameter OP_LOAD = 7'h03;
+    parameter OP_JALR = 7'h67;
+    parameter OP_BRANCH = 7'h63;
 
     parameter FUNC3_ADDI = 4'h0;
+
+    parameter FUNC3_BEQ = 4'h0;
+    parameter FUNC3_BNE = 4'h1;
+    parameter FUNC3_BLT = 4'h4;
+    parameter FUNC3_BGE = 4'h5;
+    parameter FUNC3_BLTU = 4'h6;
+    parameter FUNC3_BGEU = 4'h7;
 
     // next state combinational logic
     always @* begin
@@ -65,9 +74,21 @@ module cpu (
 
         case (opcode)
 
+            OP_BRANCH: begin
+                case (funct3)
+                    FUNC3_BEQ: begin
+                        if (xreg[rs1] == xreg[rs2])
+                            next_pc = OpBranchAddr;
+                    end
+                    FUNC3_BNE: begin
+                        if (xreg[rs1] != xreg[rs2])
+                            next_pc = OpBranchAddr;
+                    end
+                endcase
+            end
+
             OP_IMM: begin
                 case (funct3)
-
                     FUNC3_ADDI: begin
                         // TODO sign extension
                         next_xreg[rd] = xreg[rs1] + {{20{immI[11]}}, immI};
@@ -80,6 +101,15 @@ module cpu (
                 next_xreg[rd] = pc + 4;
                 // The offset is sign-extended and added to the pc to form the jump target address.
                 next_pc = pc + {{12{immJ[20]}}, immJ};
+            end
+
+            // jalr
+            OP_JALR: begin
+                next_xreg[rd] = pc + 4;
+                // The target address is obtained by adding the sign-extended 12-bit
+                // I-immediate to the register rs1, then setting the least-significant
+                //bit of the result to zero
+                next_pc = xreg[rs1] + {{20{immI[11]}}, immI};
             end
 
             // load, keep 2 cycles

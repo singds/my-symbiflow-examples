@@ -32,6 +32,9 @@ module cpu_test;
         testJal ( );
         testLittleEndian32bit ( );
         testLittleEndian16bit ( );
+        testJalr ( );
+        testBeq ( );
+        testBne ( );
 
         $finish(0);
     end
@@ -275,6 +278,58 @@ module cpu_test;
         else $display("pc=%h, save = %h", Cpu.pc, save);
 
         $display("ok: jal");
+    end
+    endtask
+
+    task testJalr;
+    begin
+        Cpu.xreg[2] = 32'h12345678;
+        Cpu.pc = 32'h90909090;
+        exeInst (1, 32'h000101e7); // jalr    x3,x2
+        assert (Cpu.xreg[3] == (32'h90909090 + 4));
+        assert (Cpu.pc == 32'h12345678);
+
+        $display("ok: jalr");
+    end 
+    endtask
+
+    task testBeq;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 0;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00520863); // beq     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 1;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00520863); // beq     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: beq");
+    end
+    endtask
+
+    task testBne;
+    begin
+        // no breanch
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 1;
+        Cpu.xreg[5] = 1;
+        exeInst (1, 32'h00521863); // bne     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h4)
+
+        // brench
+        Cpu.pc = 0;
+        Cpu.xreg[4] = 1;
+        Cpu.xreg[5] = 0;
+        exeInst (1, 32'h00521863); // bne     x4,x5,pc+0x10
+        assert (Cpu.pc == 32'h10);
+
+        $display("ok: bne");
     end
     endtask
 
