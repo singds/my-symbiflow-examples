@@ -52,6 +52,9 @@ module cpu_test;
         testSll ( );
         testSrl ( );
         testSra ( );
+        testAnd ( );
+        testOr ( );
+        testXor ( );
 
         $finish(0);
     end
@@ -633,6 +636,41 @@ module cpu_test;
     end
     endtask
 
+    task testAnd;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,              32'b11110111111011111111111011111110);
+        setCpuReg (5,              32'b11111110111111111101111011111110);
+        exeInst (1, 32'h005270b3); // and    x1,x4,x5
+        assert (getCpuReg (1) ==   32'b11110110111011111101111011111110);
+
+        $display("ok: and");
+    end
+    endtask
+
+    task testXor;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,              32'b11110111111011111111111011111110);
+        setCpuReg (5,              32'b11111110111111111101111011111110);
+        exeInst (1, 32'h005240b3); // xor    x1,x4,x5
+        assert (getCpuReg (1) ==   32'b00001001000100000010000000000000);
+
+        $display("ok: xor");
+    end
+    endtask
+
+    task testOr;
+    begin
+        clrCpuRegs;
+        setCpuReg (4,              32'b11111000000000001111110000000000);
+        setCpuReg (5,              32'b10101010101000000000001100001000);
+        exeInst (1, 32'h005260b3); // or    x1,x4,x5
+        assert (getCpuReg (1) ==   32'b11111010101000001111111100001000);
+
+        $display("ok: or");
+    end
+    endtask
 
 
 endmodule
