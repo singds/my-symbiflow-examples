@@ -55,6 +55,8 @@ module cpu_test;
         testAnd ( );
         testOr ( );
         testXor ( );
+        testSlt ( );
+        testSltu ( );
 
         $finish(0);
     end
@@ -471,7 +473,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = -32'h10;
         exeInst (1, 32'hffb2a213); // slti    x4,x5,-5
-        assert (Cpu.xreg[4] == 1)
+        assert (Cpu.xreg[4] == 1);
 
         $display("ok: slti");
     end
@@ -488,7 +490,7 @@ module cpu_test;
         Cpu.xreg[4] = -32'h1; // result register
         Cpu.xreg[5] = 0;
         exeInst (1, 32'h0052b213); // sltiu   x4,x5,5
-        assert (Cpu.xreg[4] == 1)
+        assert (Cpu.xreg[4] == 1);
 
         $display("ok: sltiu");
     end
@@ -672,6 +674,43 @@ module cpu_test;
     end
     endtask
 
+    task testSlt;
+    begin
+        // result true
+        setCpuReg (1, -32'h1); // result register
+        setCpuReg (4, -32'h05);
+        setCpuReg (5, -32'h10);
+        exeInst (1, 32'h005220b3); // slt     x1,x4,x5
+        assert (getCpuReg (1) == 0);
+        // result false
+        setCpuReg (1, -32'h1); // result register
+        setCpuReg (4, -32'h10);
+        setCpuReg (5, -32'h05);
+        exeInst (1, 32'h005220b3); // slt     x1,x4,x5
+        assert (getCpuReg (1) == 1);
+
+        $display("ok: slt");
+    end
+    endtask
+
+    task testSltu;
+    begin
+        // result true
+        setCpuReg (1, -32'h1); // result register
+        setCpuReg (4, 32'h10);
+        setCpuReg (5, 32'h05);
+        exeInst (1, 32'h005220b3); // sltu    x1,x4,x5
+        assert (getCpuReg (1) == 0);
+        // result false
+        setCpuReg (1, -32'h1); // result register
+        setCpuReg (4, 32'h05);
+        setCpuReg (5, 32'h10);
+        exeInst (1, 32'h005220b3); // sltu    x1,x4,x5
+        assert (getCpuReg (1) == 1);
+
+        $display("ok: sltu");
+    end
+    endtask
 
 endmodule
 

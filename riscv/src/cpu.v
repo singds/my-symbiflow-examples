@@ -62,6 +62,8 @@ module cpu (
     parameter FUNC3_AND = 4'h7;
     parameter FUNC3_OR = 4'h6;
     parameter FUNC3_XOR = 4'h4;
+    parameter FUNC3_SLT = 4'h2;
+    parameter FUNC3_SLTU = 4'h3;
 
     parameter FUNC3_ADDI = 4'h0;
     parameter FUNC3_SLTI = 4'h2;
@@ -118,6 +120,12 @@ module cpu (
                     end
                     FUNC3_XOR: begin
                         next_xreg[rd] = xreg[rs1] ^ xreg[rs2];
+                    end
+                    FUNC3_SLT: begin
+                        next_xreg[rd] = ($signed (xreg[rs1]) < $signed (xreg[rs2])) ? 1 : 0;
+                    end
+                    FUNC3_SLTU: begin
+                        next_xreg[rd] = (xreg[rs1] < xreg[rs2]) ? 1 : 0;
                     end
                 endcase
             end
