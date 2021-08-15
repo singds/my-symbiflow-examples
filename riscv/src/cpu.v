@@ -34,6 +34,7 @@ module cpu (
     wire [4:0] rs2 = inst_val[24:20];
 
     wire [11:0] immI = inst_val[31:20];
+    wire [31:0] immI32Signed = {{20{immI[11]}}, immI};
     wire [31:0] immU = {inst_val[31:12], 12'h0};
     wire [11:0] immS = {inst_val[31:25], inst_val[11:7]};
     wire [20:0] immJ = {inst_val[31], inst_val[19:12], inst_val[20], inst_val[30:21], 1'b0}; 
@@ -53,6 +54,11 @@ module cpu (
     parameter OP_BRANCH = 7'h63;
 
     parameter FUNC3_ADDI = 4'h0;
+    parameter FUNC3_SLTI = 4'h2;
+    parameter FUNC3_SLTIU = 4'h3;
+    parameter FUNC3_XORI = 4'h4;
+    parameter FUNC3_ORI = 4'h6;
+    parameter FUNC3_ANDI = 4'h7;
 
     parameter FUNC3_BEQ = 4'h0;
     parameter FUNC3_BNE = 4'h1;
@@ -106,8 +112,22 @@ module cpu (
             OP_IMM: begin
                 case (funct3)
                     FUNC3_ADDI: begin
-                        // TODO sign extension
-                        next_xreg[rd] = xreg[rs1] + {{20{immI[11]}}, immI};
+                        next_xreg[rd] = xreg[rs1] + immI32Signed;
+                    end
+                    FUNC3_SLTI: begin
+                        next_xreg[rd] = $signed(xreg[rs1]) < $signed(immI32Signed) ? 1 : 0;
+                    end
+                    FUNC3_SLTIU: begin
+                        next_xreg[rd] = xreg[rs1] < immI32Signed ? 1 : 0;
+                    end
+                    FUNC3_ANDI: begin
+                        next_xreg[rd] = xreg[rs1] & immI32Signed;
+                    end
+                    FUNC3_XORI: begin
+                        next_xreg[rd] = xreg[rs1] ^ immI32Signed;
+                    end
+                    FUNC3_ORI: begin
+                        next_xreg[rd] = xreg[rs1] | immI32Signed;
                     end
                 endcase
             end

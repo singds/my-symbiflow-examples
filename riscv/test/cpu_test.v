@@ -39,6 +39,11 @@ module cpu_test;
         testBltu ( );
         testBge ( );
         testBgeu ( );
+        testSlti ( );
+        testSltiu ( );
+        testAndi ( );
+        testXori ( );
+        testOri ( );
 
         $finish(0);
     end
@@ -403,20 +408,90 @@ module cpu_test;
         Cpu.pc = 0;
         Cpu.xreg[4] = 0;
         Cpu.xreg[5] = 1;
-        exeInst (1, 32'h00527863); // bge     x4,x5,pc+0x10
+        exeInst (1, 32'h00527863); // bgeu     x4,x5,pc+0x10
         assert (Cpu.pc == 32'h4)
 
         // brench
         Cpu.pc = 0;
         Cpu.xreg[4] = 1;
         Cpu.xreg[5] = 1;
-        exeInst (1, 32'h00527863); // bge     x4,x5,pc+0x10
+        exeInst (1, 32'h00527863); // bgeu     x4,x5,pc+0x10
         assert (Cpu.pc == 32'h10);
 
         $display("ok: bgeu");
     end
     endtask
 
+    task testSlti;
+    begin
+        // SLTI (set less than immediate) places the value 1 in register rd if
+        // register rs1 is less than the signextended immediate when both are
+        // treated as signed numbers, else 0 is written to rd
+        
+        // result true
+        Cpu.xreg[4] = -32'h1; // result register
+        Cpu.xreg[5] = 0;
+        exeInst (1, 32'hffb2a213); // slti    x4,x5,-5
+        assert (Cpu.xreg[4] == 0)
+        // result false
+        Cpu.xreg[4] = -32'h1; // result register
+        Cpu.xreg[5] = -32'h10;
+        exeInst (1, 32'hffb2a213); // slti    x4,x5,-5
+        assert (Cpu.xreg[4] == 1)
+
+        $display("ok: slti");
+    end
+    endtask
+
+    task testSltiu;
+    begin
+        // result true
+        Cpu.xreg[4] = -32'h1; // result register
+        Cpu.xreg[5] = 32'h10;
+        exeInst (1, 32'h0052b213); // sltiu   x4,x5,5
+        assert (Cpu.xreg[4] == 0)
+        // result false
+        Cpu.xreg[4] = -32'h1; // result register
+        Cpu.xreg[5] = 0;
+        exeInst (1, 32'h0052b213); // sltiu   x4,x5,5
+        assert (Cpu.xreg[4] == 1)
+
+        $display("ok: sltiu");
+    end
+    endtask
+
+    task testAndi;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b11111111111111111111111111111110;
+        exeInst (1, 32'hffd2f213); // andi    x4,x5,-3 // b11111111111111111111111111111101
+        assert (Cpu.xreg[4] ==                         32'b11111111111111111111111111111100)
+
+        $display("ok: andi");
+    end
+    endtask
+
+    task testXori;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b11111111111111111111111111111110;
+        exeInst (1, 32'hffd2c213); // xori    x4,x5,-3 // b11111111111111111111111111111101
+        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000000011)
+
+        $display("ok: xori");
+    end
+    endtask
+
+    task testOri;
+    begin
+        Cpu.xreg[4] = 0; // result register
+        Cpu.xreg[5] =                                  32'b00000000000000000000000000001100;
+        exeInst (1, 32'h0032e213); // xori    x4,x5,-3 // b00000000000000000000000000000011
+        assert (Cpu.xreg[4] ==                         32'b00000000000000000000000000001111)
+
+        $display("ok: ori");
+    end
+    endtask
 
 endmodule
 
