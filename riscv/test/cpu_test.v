@@ -30,6 +30,8 @@ module cpu_test;
         testStore ( );
         testLoad ( );
         testJal ( );
+        testLittleEndian32bit ( );
+        testLittleEndian16bit ( );
 
         $finish(0);
     end
@@ -78,7 +80,7 @@ module cpu_test;
     task testStore;
     begin
         
-        exeInst (1, 32'h00100113); // li      x2,1
+        Cpu.xreg[2] = 32'h00000001;
 
         // STORE 1 BYTE
         Ram.mem[0] = 32'hffffffff;
@@ -171,19 +173,92 @@ module cpu_test;
 
         Ram.mem[0] = 32'h91A1B1C1;
         // 2 byte load unsigned
-        exeInst (2, 32'h00005103); // lbu      x2,3(x0)
+        exeInst (2, 32'h00005103); // lhu      x2,3(x0)
         assert (Cpu.xreg[2] == 32'h0000B1C1);
 
-        exeInst (2, 32'h00205103); // lbu      x2,3(x0)
+        exeInst (2, 32'h00205103); // lhu      x2,3(x0)
         assert (Cpu.xreg[2] == 32'h000091A1);
 
 
         Ram.mem[0] = 32'h92A2B2C2;
         // 4 byte load
-        exeInst (2, 32'h00002103); // lb      x2,0(x0)
+        exeInst (2, 32'h00002103); // lw      x2,0(x0)
         assert (Cpu.xreg[2] == 32'h92A2B2C2);
 
         $display("ok: load");
+    end
+    endtask
+
+    task testLittleEndian32bit;
+    begin
+        // LSByte must appear before MSByte in memory
+
+        // value to be stored
+        Cpu.xreg[2] = 32'h01020304; // x2 = 1
+        Cpu.xreg[1] = 32'h00000000; // x1 = 0
+
+        // STORE 4 BYTES
+        exeInst (1, 32'h0020a023); // sw      x2,0(x1)
+
+
+        // read single bytes
+        // lowest byte
+        exeInst (2, 32'h00004103); // lbu      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'h00000004);
+        
+        exeInst (2, 32'h00104103); // lbu      x2,1(x0)
+        assert (Cpu.xreg[2] == 32'h00000003);
+        
+        exeInst (2, 32'h00204103); // lbu      x2,2(x0)
+        assert (Cpu.xreg[2] == 32'h00000002);
+        // highest byte
+        exeInst (2, 32'h00304103); // lbu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h00000001);
+
+
+        // read half words (2 byte)
+        // lowest half
+        exeInst (2, 32'h00005103); // lhu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h00000304);
+
+        // highest half
+        exeInst (2, 32'h00205103); // lhu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h00000102);
+
+
+        // read word (4 byte)
+        exeInst (2, 32'h00002103); // lw      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'h01020304);
+
+        $display("ok: little endian 32bit");
+    end
+    endtask
+
+    task testLittleEndian16bit;
+    begin
+        // LSByte must appear before MSByte in memory
+
+        // value to be stored
+        Cpu.xreg[2] = 32'h00000102; // x2 = 1
+        Cpu.xreg[1] = 32'h00000000; // x1 = 0
+
+        // STORE 2 BYTES
+        exeInst (1, 32'h00209023); // sh      x2,0(x1)
+
+        // read single bytes
+        // lowest byte
+        exeInst (2, 32'h00004103); // lbu      x2,0(x0)
+        assert (Cpu.xreg[2] == 32'h00000002);
+        // highest byte
+        exeInst (2, 32'h00104103); // lbu      x2,1(x0)
+        assert (Cpu.xreg[2] == 32'h00000001);
+
+
+        // read half word (2 byte)
+        exeInst (2, 32'h00005103); // lhu      x2,3(x0)
+        assert (Cpu.xreg[2] == 32'h00000102);
+
+        $display("ok: little endian 16bit");
     end
     endtask
 
