@@ -1,7 +1,7 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 TOP := top
-SRCDIR = ${current_dir}/src
+SRCDIR = ${current_dir}/hw
 VERILOG := ${SRCDIR}/top.v \
 	${SRCDIR}/soc.v \
 	${SRCDIR}/cpu.v \
@@ -16,7 +16,7 @@ BOARD_BUILDDIR := ${BUILDDIR}/arty_35
 
 IVERILOG := iverilog -g2012
 IVERILOGVVP := vvp
-TESTDIR = ${current_dir}/test
+TESTDIR = ${SRCDIR}/test
 
 .DELETE_ON_ERROR:
 

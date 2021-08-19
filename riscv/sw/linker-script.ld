@@ -1,0 +1,36 @@
+MEMORY
+{
+    flash : ORIGIN = 0x00000000, LENGTH = 256
+    ram : ORIGIN = 0x10000000, LENGTH = 256
+}
+
+stack_size = 100;
+
+SECTIONS
+{
+    .mytext :
+    {
+        *(.startup)
+        *(.text)
+        *(.srodata)
+        *(.rodata)
+    }> flash
+
+    .mydata :
+    {
+        . = ALIGN(4);
+        *(.data)
+        *(.sdata)
+    }> ram AT> flash
+
+    .mybss :
+    {
+        *(.bss)
+        *(COMMON)
+        . = ALIGN(4);
+        _estack = .;
+        . = . + stack_size;
+        . = ALIGN(4);
+        _sstack = .;
+    }> ram
+}
