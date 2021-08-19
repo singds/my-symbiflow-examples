@@ -14,9 +14,9 @@ module soc_test;
         $dumpfile("soc_test.vcd");
         $dumpvars(0,soc_test);
 
-        $dumpvars(1, Soc.Cpu.xreg[2]);
-        // for (k = 0; k < 32; k++)
-        //     $dumpvars(1, Soc.Cpu.xreg[k]);
+        //$dumpvars(1, Soc.Cpu.xreg[2]);
+        for (k = 0; k < 32; k++)
+             $dumpvars(1, Soc.Cpu.xreg[k]);
 
         clk = 0;
         for (k = 0; k < 200; k++)

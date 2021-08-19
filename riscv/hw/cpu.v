@@ -215,7 +215,7 @@ module cpu (
                         next_status = status + 1;
                         next_pc = pc;
                     end
-                    1: begin // one clock to save data in register
+                    1: begin // one clock to load data in register
                         next_xreg[rd] = data_rd >> {OpLoadAddr[1:0], 3'h0};
                         case (funct3[1:0])
                             0: begin // 1 byte

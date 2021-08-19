@@ -57,6 +57,7 @@ module cpu_test;
         testXor ( );
         testSlt ( );
         testSltu ( );
+        testParticularErrors ( );
 
         $finish(0);
     end
@@ -709,6 +710,19 @@ module cpu_test;
         assert (getCpuReg (1) == 1);
 
         $display("ok: sltu");
+    end
+    endtask
+
+    task testParticularErrors;
+    begin
+        setCpuReg(14, 0);
+        setCpuReg(15, 1);
+        setCpuReg(8, 32'h64);
+        exeInst (1, 32'hfef42623); // sw      a5,-20(s0)
+        exeInst (2, 32'hfec42703); // lw      a4,-20(s0)
+        assert (getCpuReg (14) == 1);
+
+        $display("ok: particular errors");
     end
     endtask
 

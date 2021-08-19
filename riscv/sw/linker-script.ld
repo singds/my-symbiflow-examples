@@ -1,7 +1,7 @@
 MEMORY
 {
     flash : ORIGIN = 0x00000000, LENGTH = 256
-    ram : ORIGIN = 0x10000000, LENGTH = 256
+    ram : ORIGIN = 0x00000000, LENGTH = 256
 }
 
 stack_size = 100;

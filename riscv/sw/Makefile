@@ -8,6 +8,7 @@ compile: ${BUILDDIR} startup.s main.c
 	cd ${BUILDDIR} && ${TC}gcc ${GCCFLAGS} -T../linker-script.ld -Wl,-Map=final.map ../main.c ../startup.s -o out.elf
 # produce hex file with rom code and data
 	cd ${BUILDDIR} && ${TC}objcopy -O ihex out.elf out.hex
+	python3 dorom.py
 
 only_compile: ${BUILDDIR} startup.s main.c
 	cd ${BUILDDIR} && ${TC}gcc ${GCCFLAGS} -S ../main.c

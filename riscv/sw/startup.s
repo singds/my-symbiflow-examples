@@ -1,5 +1,5 @@
 .section .startup
-    lw sp, _sstack
+    la sp, _sstack
     j main
 
 
