@@ -21,6 +21,10 @@ TESTDIR = ${SRCDIR}/test
 .DELETE_ON_ERROR:
 
 
+# every time you call this targets they are executed
+.PHONY: test clean
+
+
 all: ${BOARD_BUILDDIR}/${TOP}.bit
 
 ${BUILDDIR}:
@@ -50,11 +54,11 @@ ${BOARD_BUILDDIR}/${TOP}.bit: ${BOARD_BUILDDIR}/${TOP}.fasm
 clean:
 	rm -rf ${BUILDDIR}
 
-# run the example in the fpga board
+# load the bitstream in the fpga board
 run:
 	cd ${BOARD_BUILDDIR} && sudo openocd -f ${INSTALL_DIR}/${FPGA_FAM}/conda/envs/${FPGA_FAM}/share/openocd/scripts/board/digilent_arty.cfg -c "init; pld load 0 top.bit; exit"
 
-.PHONY: test
+# compile and run testbenches with Icarus Verilog
 test: ${BUILDDIR}
 	${IVERILOG} ${TESTDIR}/prog_mem_test.v ${SRCDIR}/prog_mem.v -o ${BUILDDIR}/prog_mem_test
 	${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o ${BUILDDIR}/cpu_test

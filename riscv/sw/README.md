@@ -5,5 +5,5 @@ You need to install:
 - intelhex python library
 
 Edit main.c and run `make compile`.  
-This creates **build** directory with **rom.v** file you can include as rom software memory in verilog design.  
-**rom** folder contains some prebuild example rom.
+This creates **build/** directory with **rom.v** file you can include as rom software memory in verilog design.  
+**rom/** folder contains some prebuild example rom.
