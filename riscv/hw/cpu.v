@@ -209,9 +209,9 @@ module cpu (
 
             // load, keep 2 cycles
             OP_LOAD: begin
+                data_addr = {OpLoadAddr[31:2], 2'h0};
                 case (status)
                     0: begin // one clock to get data from memory
-                        data_addr = {OpLoadAddr[31:2], 2'h0};
                         next_status = status + 1;
                         next_pc = pc;
                     end

@@ -60,10 +60,8 @@ run:
 
 # compile and run testbenches with Icarus Verilog
 test: ${BUILDDIR}
-	${IVERILOG} ${TESTDIR}/prog_mem_test.v ${SRCDIR}/prog_mem.v -o ${BUILDDIR}/prog_mem_test
 	${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o ${BUILDDIR}/cpu_test
-	${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/prog_mem.v -o ${BUILDDIR}/soc_test
+	${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/memory.v -o ${BUILDDIR}/soc_test
 
-	cd ${BUILDDIR} && ${IVERILOGVVP} prog_mem_test
 	cd ${BUILDDIR} && ${IVERILOGVVP} cpu_test
 	cd ${BUILDDIR} && ${IVERILOGVVP} soc_test

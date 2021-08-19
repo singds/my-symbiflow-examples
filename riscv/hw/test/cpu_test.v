@@ -8,10 +8,13 @@ module cpu_test;
     wire [31:0] data_addr, data_rd, data_wr;
     wire [3:0] data_wr_en;
     
-    ram Ram (clk, data_wr_en, data_addr[21:0], data_wr, data_rd);
 
+
+    ram Ram (clk, data_wr_en, data_addr[21:0], data_wr, data_rd);
     cpu Cpu (clk, inst_addr, inst_data,
         data_addr, data_rd, data_wr, data_wr_en);
+
+
 
     reg [31:0] k; // variable for cycle
     reg [31:0] save;
@@ -722,7 +725,7 @@ module cpu_test;
         exeInst (2, 32'hfec42703); // lw      a4,-20(s0)
         assert (getCpuReg (14) == 1);
 
-        $display("ok: particular errors");
+        $display("ok: no particular errors");
     end
     endtask
 

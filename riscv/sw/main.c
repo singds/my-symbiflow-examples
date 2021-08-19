@@ -7,7 +7,7 @@ void main (void)
     while (1)
     {
         counter++;
-        if (counter >= 4)
+        if (counter >= 3)
         {
             counter = 0;
             led = !led;
