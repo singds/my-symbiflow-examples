@@ -3,7 +3,7 @@ GCCFLAGS=-nostdlib
 BUILDDIR=build
 
 compile: ${BUILDDIR} startup.s main.c
-	cd ${BUILDDIR} && ${TC}gcc ${GCCFLAGS} -T../linker-script.ld -Wl,-Map=final.map ../main.c ../startup.s -o out.elf
+	cd ${BUILDDIR} && ${TC}gcc ${GCCFLAGS} -O0 -T../linker-script.ld -Wl,-Map=final.map ../main.c ../startup.s -o out.elf
 # create hex file with rom code and data
 	cd ${BUILDDIR} && ${TC}objcopy -O ihex out.elf out.hex
 # convert hex file in verilog memory array

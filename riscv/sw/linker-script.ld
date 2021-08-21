@@ -14,13 +14,18 @@ SECTIONS
         *(.text)
         *(.srodata)
         *(.rodata)
+        . = ALIGN(4);
+        _srcStartData = .;
     }> flash
 
     .mydata :
     {
         . = ALIGN(4);
+        _dstStartData = .;
         *(.data)
         *(.sdata)
+        . = ALIGN(4);
+        _dstEnddata = .;
     }> ram AT> flash
 
     .mybss :

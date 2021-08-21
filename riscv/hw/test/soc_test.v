@@ -19,7 +19,7 @@ module soc_test;
         //     $dumpvars(k+1, Soc.Cpu.xreg[k]);
 
         clk = 0;
-        for (k = 0; k < 200; k++)
+        for (k = 0; k < 400; k++)
         begin
             #1; clk = 1;
             #1; clk = 0;

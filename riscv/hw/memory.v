@@ -3,12 +3,15 @@ module rom_memory #(
 	parameter integer WORDS = 256
 ) (
     input [31:0] address, // input address
-    output [31:0] data // output data
+    output [31:0] data, // output data
+	input [31:0] addressB, // second port input address
+	output [31:0] dataB // second port output data
 );
     reg [31:0] mem [0:WORDS-1];
 
     // only 4 byte aligned accesses
     assign data = mem[address[31:2]];
+	assign dataB = mem[addressB[31:2]];
 
     initial begin
 
