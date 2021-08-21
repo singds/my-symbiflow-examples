@@ -16,7 +16,7 @@ You need to install:
 Just report my installation commands for convenience:
 ```bash
 sudo apt update
-sudo apt install make gcc bison gperf readline termcap autocont
+sudo apt install make gcc bison gperf autoconf
 
 git clone https://github.com/steveicarus/iverilog.git
 cd iverilog
