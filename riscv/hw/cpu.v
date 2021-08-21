@@ -262,9 +262,6 @@ module cpu (
             end
         endcase
 
-        
-        if (next_status == 0)
-
         // x0 must always be 0
         xreg[0] = 32'h0;
     end
