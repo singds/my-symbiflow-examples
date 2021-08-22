@@ -263,7 +263,7 @@ module cpu (
         endcase
 
         // x0 must always be 0
-        xreg[0] = 32'h0;
+        next_xreg[0] = 32'h0;
     end
 
 

@@ -54,7 +54,7 @@ module soc (
         );
     
     // led peripheral
-    assign led_wr = (data_wr_en == 4'b1111) && sel_led;
+    wire led_wr = (data_wr_en == 4'b1111) && sel_led;
     always @(posedge clk) begin
         if (led_wr)
             led = data_wr[3:0];

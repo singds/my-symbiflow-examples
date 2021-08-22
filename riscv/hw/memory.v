@@ -18,11 +18,11 @@ module rom_memory #(
 // you decide the program you want to run uncommenting the right line of the following
 
 // prebuild rom examples
-        //`include "sw/rom/led-blink.v"
-        //`include "sw/rom/led-blink-fast.v"
+        //`include "../sw/rom/led-blink.v"
+        //`include "../sw/rom/led-blink-fast.v"
 
 // you rom compiled from sw/main.c
-        `include "sw/build/rom.v"
+        `include "../sw/build/rom.v"
 
     end
 endmodule

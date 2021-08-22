@@ -26,7 +26,9 @@ for segment in ih.segments():
 
     # 4 byte aligned start and size
     startAddrAligned = startAddr - (startAddr % 4)
-    endAddrAligned = endAddr + (4 - (endAddr % 4))
+    endAddrAligned = endAddr
+    if (endAddr % 4):
+        endAddrAligned += (4 - (endAddr % 4))
     sizeAligned = endAddrAligned - startAddr
 
     # build a 4bytes data array form 1byte data array

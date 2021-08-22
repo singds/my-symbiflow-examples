@@ -5,7 +5,7 @@ SRCDIR = ${current_dir}/hw
 VERILOG := ${SRCDIR}/top.v \
 	${SRCDIR}/soc.v \
 	${SRCDIR}/cpu.v \
-	${SRCDIR}/prog_mem.v
+	${SRCDIR}/memory.v
 DEVICE := xc7a50t_test
 BITSTREAM_DEVICE := artix7
 BUILDDIR := build
@@ -60,8 +60,8 @@ run:
 
 # compile and run testbenches with Icarus Verilog
 test: ${BUILDDIR}
-	${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o ${BUILDDIR}/cpu_test
-	${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/memory.v -o ${BUILDDIR}/soc_test
+	cd ${BUILDDIR} && ${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o cpu_test
+	cd ${BUILDDIR} && ${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/memory.v -o soc_test
 
 	cd ${BUILDDIR} && ${IVERILOGVVP} cpu_test
 	cd ${BUILDDIR} && ${IVERILOGVVP} soc_test
