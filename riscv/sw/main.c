@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-const uint8_t constant = 1;
+#define REG_ADDR_LED    (0x20000000)
 
 void main (void)
 {
@@ -8,13 +8,12 @@ void main (void)
     uint32_t led = 0;
     while (1)
     {
-        volatile const uint8_t *total = &constant;
-        counter++;
-        if (counter >= *total)
+        counter+=1;
+        if (counter >= 1000000)
         {
             counter = 0;
-            led = !led;
-            *((uint32_t *) 0x20000000) = led;
+            led=!led;
+            *((uint32_t *) REG_ADDR_LED) = 0x02 | led;
         }
     }
 }

@@ -1,5 +1,5 @@
 module soc (
-    input clk,
+    input in_clk,
     output reg [3:0] led
 );
     wire [31:0] prog_addr, prog_data;
@@ -11,6 +11,11 @@ module soc (
 
     localparam RAMSIZE = 256;
     localparam ROMSIZE = 256;
+
+
+    wire clk;
+    // lower the 100 Mhz frequency
+    clk_divider divider(in_clk, clk);
 
     // rom start from address 0x00000000
     // ram start from address 0x10000000
@@ -64,4 +69,24 @@ module soc (
         led = 0;
     end
     
+endmodule
+
+
+// divide the clock by 4
+module clk_divider
+(
+    input clk,
+    output out
+);
+
+    reg [31:0] div;
+    assign out = div[1];
+
+    always @(posedge clk) begin
+        div = div + 1;
+    end
+
+    initial begin
+        div = 0;
+    end
 endmodule

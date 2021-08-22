@@ -44,43 +44,43 @@ module cpu (
     wire [31:0] OpLoadAddr = xreg[rs1] + {{20{immI[11]}}, immI};
     wire [31:0] OpBranchAddr = pc + {{19{immB[12]}}, immB};
 
-    parameter OP_IMM = 7'h13;
-    parameter OP_LUI = 7'h37;
-    parameter OP_AUIPC = 7'h17;
-    parameter OP_STORE = 7'h23;
-    parameter OP_JAL = 7'h6f;
-    parameter OP_LOAD = 7'h03;
-    parameter OP_JALR = 7'h67;
-    parameter OP_BRANCH = 7'h63;
-    parameter OP_OP = 7'h33;
+    localparam OP_IMM = 7'h13;
+    localparam OP_LUI = 7'h37;
+    localparam OP_AUIPC = 7'h17;
+    localparam OP_STORE = 7'h23;
+    localparam OP_JAL = 7'h6f;
+    localparam OP_LOAD = 7'h03;
+    localparam OP_JALR = 7'h67;
+    localparam OP_BRANCH = 7'h63;
+    localparam OP_OP = 7'h33;
 
-    parameter FUNC3_ADD = 4'h0;
-    parameter FUNC3_SUB = 4'h0;
-    parameter FUNC3_SLL = 4'h1;
-    parameter FUNC3_SRL = 4'h5;
-    parameter FUNC3_SRA = 4'h5;
-    parameter FUNC3_AND = 4'h7;
-    parameter FUNC3_OR = 4'h6;
-    parameter FUNC3_XOR = 4'h4;
-    parameter FUNC3_SLT = 4'h2;
-    parameter FUNC3_SLTU = 4'h3;
+    localparam FUNC3_ADD = 4'h0;
+    localparam FUNC3_SUB = 4'h0;
+    localparam FUNC3_SLL = 4'h1;
+    localparam FUNC3_SRL = 4'h5;
+    localparam FUNC3_SRA = 4'h5;
+    localparam FUNC3_AND = 4'h7;
+    localparam FUNC3_OR = 4'h6;
+    localparam FUNC3_XOR = 4'h4;
+    localparam FUNC3_SLT = 4'h2;
+    localparam FUNC3_SLTU = 4'h3;
 
-    parameter FUNC3_ADDI = 4'h0;
-    parameter FUNC3_SLTI = 4'h2;
-    parameter FUNC3_SLTIU = 4'h3;
-    parameter FUNC3_XORI = 4'h4;
-    parameter FUNC3_ORI = 4'h6;
-    parameter FUNC3_ANDI = 4'h7;
-    parameter FUNC3_SLLI = 4'h1;
-    parameter FUNC3_SRLI = 4'h5;
-    parameter FUNC3_SRAI = 4'h5;
+    localparam FUNC3_ADDI = 4'h0;
+    localparam FUNC3_SLTI = 4'h2;
+    localparam FUNC3_SLTIU = 4'h3;
+    localparam FUNC3_XORI = 4'h4;
+    localparam FUNC3_ORI = 4'h6;
+    localparam FUNC3_ANDI = 4'h7;
+    localparam FUNC3_SLLI = 4'h1;
+    localparam FUNC3_SRLI = 4'h5;
+    localparam FUNC3_SRAI = 4'h5;
 
-    parameter FUNC3_BEQ = 4'h0;
-    parameter FUNC3_BNE = 4'h1;
-    parameter FUNC3_BLT = 4'h4;
-    parameter FUNC3_BGE = 4'h5;
-    parameter FUNC3_BLTU = 4'h6;
-    parameter FUNC3_BGEU = 4'h7;
+    localparam FUNC3_BEQ = 4'h0;
+    localparam FUNC3_BNE = 4'h1;
+    localparam FUNC3_BLT = 4'h4;
+    localparam FUNC3_BGE = 4'h5;
+    localparam FUNC3_BLTU = 4'h6;
+    localparam FUNC3_BGEU = 4'h7;
 
     // next state combinational logic
     always @* begin
