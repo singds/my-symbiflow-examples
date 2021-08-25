@@ -1,3 +1,5 @@
+See prerequisites section before doing all kind of stuff.  
+
 This project is created for the [Arty 35T](https://www.xilinx.com/products/boards-and-kits/arty.html) board although could be adapted for other boards.  
   
 Run `make` to build the fpga bitstream.  
@@ -8,6 +10,7 @@ Connect the board with usb and run `make run` to load the bitstream in the FPGA 
 - **hw/** contains all verilog files that describes and test the riscv core.   
 - **hw/test/** contains testbenches that tests single core components and the soc as a whole. **soc_test.v** tests the whole soc with a running software.
 - **sw/** contains resources to compile software for the riscv core.
+
 
 # prerequisites
 
@@ -26,7 +29,7 @@ make
 
 make install
 ```
-- riscv32i toolchain
+- To compile software for the core see **sw/README.md** with corresponding requisites.  
 
 
 

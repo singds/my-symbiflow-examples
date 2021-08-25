@@ -1,6 +1,6 @@
-TC=/opt/riscv32i/bin/riscv32-unknown-elf-
-GCCFLAGS=-nostdlib
-BUILDDIR=build
+TC ?= /opt/riscv32i/bin/riscv32-unknown-elf-
+GCCFLAGS = -nostdlib
+BUILDDIR = build
 
 compile: ${BUILDDIR} startup.s main.c
 	cd ${BUILDDIR} && ${TC}gcc ${GCCFLAGS} -O0 -T../linker-script.ld -Wl,-Map=final.map ../main.c ../startup.s -o out.elf
