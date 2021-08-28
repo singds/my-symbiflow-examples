@@ -26,6 +26,8 @@ module soc (
     wire sel_led = (data_addr == 32'h20000000);
 
     wire [3:0] data_wr_en_ram = sel_ram ? data_wr_en : 0;
+    // this expression uses reduction operator & in (& data_wr_en)
+    wire data_wr_en_led = (& data_wr_en) & sel_led;
 
     wire [31:0] data_rd =
         sel_ram ? data_rd_ram :
@@ -58,10 +60,10 @@ module soc (
         .data_wr_en(data_wr_en)
         );
     
+    
     // led peripheral
-    wire led_wr = (data_wr_en == 4'b1111) && sel_led;
     always @(posedge clk) begin
-        if (led_wr)
+        if (data_wr_en_led)
             led = data_wr[3:0];
     end
 
