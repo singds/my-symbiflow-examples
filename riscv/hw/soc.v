@@ -19,11 +19,15 @@ module soc (
 
     // rom start from address 0x00000000
     // ram start from address 0x10000000
+    localparam ROM_START_ADDR = 32'h00000000;
+    localparam RAM_START_ADDR = 32'h10000000;
+    localparam LED_REG_ADDR = 32'h20000000;
+    
 
     // true when address is pointing to ram memory
-    wire sel_ram = (data_addr >= 32'h10000000) && (data_addr < (32'h10000000 + RAMSIZE));
-    wire sel_rom = (data_addr >= 32'h00000000) && (data_addr < (32'h00000000 + RAMSIZE));
-    wire sel_led = (data_addr == 32'h20000000);
+    wire sel_ram = (data_addr >= RAM_START_ADDR) && (data_addr < (RAM_START_ADDR + RAMSIZE));
+    wire sel_rom = (data_addr >= ROM_START_ADDR) && (data_addr < (ROM_START_ADDR + RAMSIZE));
+    wire sel_led = (data_addr == LED_REG_ADDR);
 
     wire [3:0] data_wr_en_ram = sel_ram ? data_wr_en : 0;
     // this expression uses reduction operator & in (& data_wr_en)
@@ -38,15 +42,15 @@ module soc (
     ram_memory #(RAMSIZE) Ram (
         .clk(clk),
         .wen(data_wr_en_ram),
-        .addr(data_addr[21:0]),
+        .addr(data_addr - RAM_START_ADDR),
         .wdata(data_wr),
         .rdata(data_rd_ram)
         );
 
     rom_memory #(ROMSIZE) Rom (
-        .address(prog_addr),
+        .address(prog_addr - ROM_START_ADDR),
         .data(prog_data),
-        .addressB(data_addr),
+        .addressB(data_addr - ROM_START_ADDR),
         .dataB(data_rd_rom)
         );
 

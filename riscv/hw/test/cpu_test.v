@@ -9,8 +9,8 @@ module cpu_test;
     wire [3:0] data_wr_en;
     
 
-
-    ram Ram (clk, data_wr_en, data_addr[21:0], data_wr, data_rd);
+    // ram is mapped at address 0x00000000
+    ram_memory Ram (clk, data_wr_en, data_addr, data_wr, data_rd);
     cpu Cpu (clk, inst_addr, inst_data,
         data_addr, data_rd, data_wr, data_wr_en);
 
@@ -61,6 +61,7 @@ module cpu_test;
         testSlt ( );
         testSltu ( );
         testParticularErrors ( );
+        testWriteMemory ( );
 
         $finish(0);
     end
@@ -131,49 +132,50 @@ module cpu_test;
     // Test STORE operation
     task testStore;
     begin
+        localparam DST_32BIT_ADDR = 32'h05;
+        localparam DST_8BIT_ADDR = DST_32BIT_ADDR * 4;
         
-        Cpu.xreg[2] = 32'h00000001;
+        setCpuReg(2,32'h01);
 
         // STORE 1 BYTE
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00000093); // li      x1,0
-        // store x2 in address x1 + 0
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 0);
         exeInst (1, 32'h00208023); // sb      x2,0(x1)
-        assert (Ram.mem[0] == 32'hffffff01);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'hffffff01);
 
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00100093); // li      x1,1
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 1);
         exeInst (1, 32'h00208023); // sb      x2,0(x1)
-        assert (Ram.mem[0] == 32'hffff01ff);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'hffff01ff);
 
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00200093); // li      x1,2
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 2);
         exeInst (1, 32'h00208023); // sb      x2,0(x1)
-        assert (Ram.mem[0] == 32'hff01ffff);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'hff01ffff);
 
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00300093); // li      x1,3
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 3);
         exeInst (1, 32'h00208023); // sb      x2,0(x1)
-        assert (Ram.mem[0] == 32'h01ffffff);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'h01ffffff);
 
 
         // STORE 2 BYTES
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00000093); // li      x1,0
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 0);
         exeInst (1, 32'h00209023); // sh      x2,0(x1)
-        assert (Ram.mem[0] == 32'hffff0001);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'hffff0001);
 
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00200093); // li      x1,2
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 2);
         exeInst (1, 32'h00209023); // sh      x2,0(x1)
-        assert (Ram.mem[0] == 32'h0001ffff);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'h0001ffff);
 
 
         // STORE 4 BYTES
-        Ram.mem[0] = 32'hffffffff;
-        exeInst (1, 32'h00000093); // li      x1,0
+        Ram.mem[DST_32BIT_ADDR] = 32'hffffffff;
+        setCpuReg(1, DST_8BIT_ADDR + 0);
         exeInst (1, 32'h0020a023); // sw      x2,0(x1)
-        assert (Ram.mem[0] == 32'h00000001);
+        assert (Ram.mem[DST_32BIT_ADDR] == 32'h00000001);
 
         $display("ok: store");
     end
@@ -729,25 +731,34 @@ module cpu_test;
     end
     endtask
 
-endmodule
+    task testWriteMemory;
+    begin
+        // LSByte must appear before MSByte in memory
 
-// ram start at address 0
-module ram #(
-	parameter integer WORDS = 256
-) (
-	input clk,
-	input [3:0] wen,
-	input [21:0] addr,
-	input [31:0] wdata,
-	output reg [31:0] rdata
-);
-	reg [31:0] mem [0:WORDS-1];
+        // value to be stored
+        Cpu.xreg[1] = 32'h01020304; // x2 = 1
+        Cpu.xreg[1] = 32'h00000000; // x1 = 0
 
-	always @(posedge clk) begin
-		rdata <= mem[addr];
-		if (wen[0]) mem[addr][ 7: 0] <= wdata[ 7: 0];
-		if (wen[1]) mem[addr][15: 8] <= wdata[15: 8];
-		if (wen[2]) mem[addr][23:16] <= wdata[23:16];
-		if (wen[3]) mem[addr][31:24] <= wdata[31:24];
-	end
+        // STORE 4 BYTES
+        exeInst (1, 32'h0020a023); // sw      x2,0(x1)
+
+        // STORE 1 BYTE
+        setCpuReg (1, 32'h04);
+        setCpuReg (2, 32'hA0);
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
+        setCpuReg (1, 32'h05);
+        setCpuReg (2, 32'hA1);
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
+        setCpuReg (1, 32'h06);
+        setCpuReg (2, 32'hA2);
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
+        setCpuReg (1, 32'h07);
+        setCpuReg (2, 32'hA3);
+        exeInst (1, 32'h00208023); // sb      x2,0(x1)
+        assert (Ram.mem[1] == 32'ha3a2a1a0);
+
+        $display("ok: little endian write");
+    end
+    endtask
+
 endmodule

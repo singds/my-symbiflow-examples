@@ -1,6 +1,8 @@
 module cpu (
     input clk,
 
+    // all instruction and data addresses requested by cpu are 4 byte aligned: last 2 bytes are zero
+
     // all instruction are 32bit wide
     output [31:0] inst_addr, // instruction memory address
     input [31:0] inst_val, // instruction memory data

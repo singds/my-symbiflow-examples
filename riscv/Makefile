@@ -60,7 +60,7 @@ run:
 
 # compile and run testbenches with Icarus Verilog
 test: ${BUILDDIR}
-	cd ${BUILDDIR} && ${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v -o cpu_test
+	cd ${BUILDDIR} && ${IVERILOG} ${TESTDIR}/cpu_test.v ${SRCDIR}/cpu.v ${SRCDIR}/memory.v -o cpu_test
 	cd ${BUILDDIR} && ${IVERILOG} ${TESTDIR}/soc_test.v ${SRCDIR}/soc.v ${SRCDIR}/cpu.v ${SRCDIR}/memory.v -o soc_test
 
 	cd ${BUILDDIR} && ${IVERILOGVVP} cpu_test
