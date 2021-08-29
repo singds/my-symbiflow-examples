@@ -23,16 +23,17 @@ module soc (
     localparam RAM_START_ADDR = 32'h10000000;
     localparam LED_REG_ADDR = 32'h20000000;
     
-
+    // ADDRESS DECODER
     // true when address is pointing to ram memory
     wire sel_ram = (data_addr >= RAM_START_ADDR) && (data_addr < (RAM_START_ADDR + RAMSIZE));
-    wire sel_rom = (data_addr >= ROM_START_ADDR) && (data_addr < (ROM_START_ADDR + RAMSIZE));
+    wire sel_rom = (data_addr >= ROM_START_ADDR) && (data_addr < (ROM_START_ADDR + ROMSIZE));
     wire sel_led = (data_addr == LED_REG_ADDR);
 
     wire [3:0] data_wr_en_ram = sel_ram ? data_wr_en : 0;
     // this expression uses reduction operator & in (& data_wr_en)
     wire data_wr_en_led = (& data_wr_en) & sel_led;
 
+    // MUX data_rd multiplexer
     wire [31:0] data_rd =
         sel_ram ? data_rd_ram :
         sel_rom ? data_rd_rom :
