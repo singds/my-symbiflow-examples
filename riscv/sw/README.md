@@ -23,10 +23,12 @@ pip3 install intelhex
 You can use a prebuild toolchain or compile it from sources. This last option can take you hours depending on your pc configuration.  
 For a [prebuild toolchain](https://github.com/stnolting/riscv-gcc-prebuilt) :
 ```bash
-wget https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-2.0.0/riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
+cd my-simbiflow-examples/riscv/sw
 
 mkdir rv32i-toolchain
-tar -xzf riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz -C rv32i-toolchain
+cd rv32i-toolchain
+wget https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-2.0.0/riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
+tar -xzf riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
 
-export TC=$(pwd)/rv32i-toolchain/bin/riscv32-unknown-elf-
+export TC=$(pwd)/bin/riscv32-unknown-elf-
 ```
