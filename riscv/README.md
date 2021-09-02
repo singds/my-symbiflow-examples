@@ -19,7 +19,7 @@ You need to install:
 Just report my installation commands for convenience:
 ```bash
 sudo apt update
-sudo apt install make gcc bison gperf autoconf
+sudo apt install make gcc bison gperf autoconf flex
 
 git clone https://github.com/steveicarus/iverilog.git
 cd iverilog

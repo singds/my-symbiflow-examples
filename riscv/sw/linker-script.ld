@@ -30,9 +30,12 @@ SECTIONS
 
     .mybss :
     {
+        . = ALIGN(4);
+        _startBss = .;
         *(.bss)
         *(COMMON)
         . = ALIGN(4);
+        _endBss = .;
         _estack = .;
         . = . + stack_size;
         . = ALIGN(4);

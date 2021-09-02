@@ -13,7 +13,7 @@ You need to install:
 - python3 with the needed libraries
 ```bash
 sudo apt update
-sudo apt install python3
+sudo apt install python3 python3-pip
 
 # python libraries
 pip3 install intelhex
@@ -28,5 +28,5 @@ wget https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-2.0
 mkdir rv32i-toolchain
 tar -xzf riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz -C rv32i-toolchain
 
-export TC=$(pwd)/rv32i-toolchain
+export TC=$(pwd)/rv32i-toolchain/bin/riscv32-unknown-elf-
 ```
