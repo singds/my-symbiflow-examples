@@ -1,5 +1,6 @@
 TC ?= /opt/riscv32i/bin/riscv32-unknown-elf-
-GCCFLAGS = -nostdlib
+# -mno-relax option disables linker relaxation. See linker script for more info.
+GCCFLAGS = -nostdlib -mno-relax
 BUILDDIR = build
 
 compile: ${BUILDDIR} startup.s main.c
