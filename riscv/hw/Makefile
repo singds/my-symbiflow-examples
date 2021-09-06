@@ -1,7 +1,7 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
 TOP := top
-SRCDIR = ${current_dir}/hw
+SRCDIR = ${current_dir}
 VERILOG := ${SRCDIR}/top.v \
 	${SRCDIR}/soc.v \
 	${SRCDIR}/cpu.v \
