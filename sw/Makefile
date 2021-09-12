@@ -1,4 +1,6 @@
-TC ?= /opt/riscv32i/bin/riscv32-unknown-elf-
+#TC ?= /opt/riscv32i/bin/riscv32-unknown-elf-
+TC ?= ../../rv32i-toolchain/bin/riscv32-unknown-elf-
+
 # -mno-relax option disables linker relaxation. See linker script for more info.
 GCCFLAGS = -nostdlib -mno-relax
 BUILDDIR = build
